@@ -174,21 +174,21 @@ var PagedTable = function (pagedTable) {
     var columns = typeof(options.columns) !== "undefined" ? options.columns : {};
     var rows = typeof(options.rows) !== "undefined" ? options.rows : {};
 
-    var positiveIntOrNull = function(value) {
-      return parseInt(value) >= 0 ? parseInt(value) : null;
+    var positiveIntOrNull = function(value, def) {
+      return parseInt(value) >= 0 ? parseInt(value) : def;
     };
 
     return {
-      pages: positiveIntOrNull(options.pages),
+      pages: positiveIntOrNull(options.pages, null),
       rows: {
-        min: positiveIntOrNull(rows.min),
-        max: positiveIntOrNull(rows.max),
-        total: positiveIntOrNull(rows.total)
+        min: positiveIntOrNull(rows.min, 5),
+        max: positiveIntOrNull(rows.max, 10),
+        total: positiveIntOrNull(rows.total, null)
       },
       columns: {
-        min: positiveIntOrNull(columns.min),
-        max: positiveIntOrNull(columns.max),
-        total: positiveIntOrNull(columns.total)
+        min: positiveIntOrNull(columns.min, 1),
+        max: positiveIntOrNull(columns.max, 10),
+        total: positiveIntOrNull(columns.total, null)
       }
     };
   }(source);
@@ -359,7 +359,7 @@ var PagedTable = function (pagedTable) {
       columns.forEach(function(column) {
         var maxChars = Math.max(
           column.label.toString().length,
-          column.type.toString().length
+          column.type ? column.type.toString().length : 0
         );
 
         for (var idxRow = 0; idxRow < Math.min(widthsLookAhead, data.length); idxRow++) {
@@ -533,6 +533,7 @@ var PagedTable = function (pagedTable) {
 
     columns.subset = columns.subset.map(function(columnData) {
       var column = document.createElement("th");
+      if (typeof(columnData.align) === "undefined") columnData.align = "left";
       column.setAttribute("align", columnData.align);
       column.style.textAlign = columnData.align;
 
@@ -558,7 +559,9 @@ var PagedTable = function (pagedTable) {
         columnType.innerHTML = "&nbsp;";
       }
       else {
-        columnType.appendChild(document.createTextNode("<" + columnData.type + ">"));
+        if (typeof(columnData.type) !== "undefined") {
+          columnType.appendChild(document.createTextNode("<" + columnData.type + ">"));
+        }
       }
       column.appendChild(columnType);
 
