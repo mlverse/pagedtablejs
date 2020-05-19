@@ -155,7 +155,44 @@ if (!Array.prototype.map) {
 var PagedTable = function (pagedTable, source) {
   var me = this;
 
+  var pagedTable = function(pagedTable) {
+    if (typeof(pagedTable) === "string") {
+      pagedTable = document.getElementById(pagedTable);
+    }
+
+    return pagedTable;
+  }(pagedTable);
+
   var validateSource = function(source) {
+    if (typeof(source.data) === "undefined") {
+      source.data = source;
+    }
+    
+    if (typeof(source.columns) === "undefined") {
+      var columns = []
+      var keys = Object.keys(source.data[0]);
+      for (var idx = 0; idx < keys.length; idx++) {
+        columns[idx] = { name: keys[idx] };
+      }
+
+      source = {
+        data: source,
+        columns: columns
+      };
+    }
+    // if the column contains an array of names, not dictionary
+    else if (typeof(source.columns[0].length) !== "undefined") {
+      var columns = []
+      for (var idx = 0; idx < source.columns.length; idx++) {
+        columns[idx] = { name: source.columns[idx] };
+      }
+
+      source = {
+        data: source.data,
+        columns: columns
+      };
+    }
+
     for (var idx = 0; idx < source.columns.length ; idx++) {
       if (typeof(source.columns[idx].label) === "undefined")
         source.columns[idx].label = source.columns[idx].name;
