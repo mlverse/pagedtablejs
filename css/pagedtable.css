@@ -2,12 +2,13 @@
   overflow: auto;
   padding-left: 8px;
   padding-right: 8px;
+  color: #333;
+  font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+  font-size: 14px;
 }
 
 .pagedtable-wrapper {
-  border: 1px solid #ccc;
   border-radius: 4px;
-  margin-bottom: 10px;
 }
 
 .pagedtable table {
@@ -29,7 +30,7 @@
 }
 
 .pagedtable td {
-  padding: 0 4px 0 4px;
+  padding: 8px 8px 8px 8px;
 }
 
 .pagedtable .even {
