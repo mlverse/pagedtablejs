@@ -152,24 +152,33 @@ if (!Array.prototype.map) {
   };
 }
 
-var PagedTable = function (pagedTable, data) {
+var PagedTable = function (pagedTable, source) {
   var me = this;
 
-  var source = function(pagedTable) {
-    if (typeof(data) !== "undefined") {
-      return data;
-    };
-
-    var sourceElems = [].slice.call(pagedTable.children).filter(function(e) {
-      return e.hasAttribute("data-pagedtable-source");
-    });
-
-    if (sourceElems === null || sourceElems.length !== 1) {
-      throw("A single data-pagedtable-source was not found");
+  var validateSource = function(source) {
+    for (var idx = 0; idx < source.columns.length ; idx++) {
+      if (typeof(source.columns[idx].label) === "undefined")
+        source.columns[idx].label = source.columns[idx].name;
     }
 
-    return JSON.parse(sourceElems[0].innerHTML);
-  }(pagedTable);
+    return source;
+  }
+
+  var source = function(pagedTable, source) {
+    if (typeof(source) === "undefined") {
+      var sourceElems = [].slice.call(pagedTable.children).filter(function(e) {
+        return e.hasAttribute("data-pagedtable-source");
+      });
+
+      if (sourceElems === null || sourceElems.length !== 1) {
+        throw("A single data-pagedtable-source was not found");
+      }
+
+      source = JSON.parse(sourceElems[0].innerHTML);
+    }
+
+    return validateSource(source);
+  }(pagedTable, source);
 
   var options = function(source) {
     var options = typeof(source.options) !== "undefined" &&
