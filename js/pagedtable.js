@@ -152,10 +152,14 @@ if (!Array.prototype.map) {
   };
 }
 
-var PagedTable = function (pagedTable) {
+var PagedTable = function (pagedTable, data) {
   var me = this;
 
   var source = function(pagedTable) {
+    if (typeof(data) !== "undefined") {
+      return data;
+    };
+
     var sourceElems = [].slice.call(pagedTable.children).filter(function(e) {
       return e.hasAttribute("data-pagedtable-source");
     });
