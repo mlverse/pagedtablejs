@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.0.0/d3.js"></script>
+    <link rel="stylesheet" href="../css/pagedtable.css">
+    <script type="text/javascript" src="../js/pagedtable.js"></script>
+  </head>
+  <body>
+    <div id="pagedtable" style="width: 50%; margin: 100px auto auto auto;"></div>
+    <script type="application/javascript">
+        d3.csv("https://cdn.rawgit.com/vlandham/js_data/master/data/cities.csv").then(function(dataframe) {
+          (new PagedTable("pagedtable", dataframe)).init();
+        });
+      </script>
+  </body>
+</html>
