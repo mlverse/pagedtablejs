@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Document</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <meta name="description" content="Description">
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+
+  <!-- styles -->
+  <style>
+    .markdown-section h1 {
+      margin-top: 40px !important;
+    }
+  </style>
+
+  <!-- docsify -->
+  <link rel="stylesheet" href="//unpkg.com/docsify/lib/themes/vue.css">
+
+  <!-- pagedtable.js -->
+  <link rel="stylesheet" href="css/pagedtable.css">
+  <script type="text/javascript" src="js/pagedtable.js"></script>
+
+  <!-- examples dependencies -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.0.0/d3.js"></script>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+</head>
+<body>
+  <div id="app"></div>
+  <script>
+    let createCodeFn = function(oCodeFn) {
+      return function(code, lang) {
+        var preview = /^\s*\/\*\s*preview\s*\*\//.test(code);
+        var display = /^\s*\/\*\s*display\s*\*\//.test(code);
+        code = code.replace(/\/\*(preview|display)\*\/[\r\n]*/, "");
+
+        lang = lang || ''
+        var hl = Prism.highlight(code, Prism.languages[lang] || Prism.languages.markup)
+        var html = '<pre v-pre data-lang="' + lang + '"><code class="lang-' + lang + '">' + hl + '</code></pre>'
+
+        if (preview) html = html + code;
+        if (display) html = code;
+
+        return html;
+      }
+    }
+
+    window.$docsify = {
+      name: 'pagedtablejs',
+      repo: 'https://github.com/mlverse/pagedtablejs',
+      coverpage: true,
+      plugins: function(hook, vm) {
+        window.$docsify.markdown = window.$docsify.markdown || {}
+        window.$docsify.markdown.renderer = window.$docsify.markdown.renderer || {}
+        window.$docsify.markdown.renderer.code = createCodeFn(window.$docsify.markdown.renderer.code)
+      }
+    }
+
+    var totalPagedTable = 0;
+    setInterval(function() {
+      var pagedTables = [].slice.call(document.querySelectorAll('[data-pagedtable="false"],[data-pagedtable=""]'));
+      if (pagedTables.length !== totalPagedTable) {
+        PagedTableDoc.initAll();
+        totalPagedTable = pagedTables.length;
+      }
+    }, 1000);
+  </script>
+  <script src="//unpkg.com/docsify/lib/docsify.min.js"></script>
+
+  <!-- programmatic example -->
+  <script type="application/javascript">
+    var dataframe = {
+      "columns": [{ "name": "letter" }, { "name": "number" }],
+      "data": []
+    };
+
+    for (var idx = 0; idx < 26; idx++) {
+      dataframe.data[idx] = { letter: String.fromCharCode('A'.charCodeAt(0) + idx), number: idx + 1 };
+    }
+    
+    setTimeout(function() {
+      var pagedTableElem = document.getElementById("pagedtable");
+      var pagedTable = new PagedTable(pagedTableElem, dataframe);
+      pagedTable.init()
+    }, 2000);
+  </script>
+
+  <!-- d3 example -->
+  <script type="application/javascript">
+    setTimeout(function() {
+      d3.csv("https://cdn.rawgit.com/vlandham/js_data/master/data/cities.csv").then(function(dataframe) {
+        (new PagedTable("pagedtable-d3", dataframe)).init();
+      });
+    }, 1000);
+  </script>
+</body>
+</html>
