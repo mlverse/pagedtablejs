@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.min.js"></script>
+    <link rel="stylesheet" href="../css/pagedtable.css">
+    <script type="text/javascript" src="../js/pagedtable.js"></script>
+  </head>
+  <body>
+    <div id="app" class="container" style="margin-top: 50px;">
+      <div class="row">
+        <div class="col-3">
+          <label for="rows">Total Rows: {{ rows }}</label>
+          <div class="form-group">
+            <input id="rows" type="range" class="custom-range" min=1 style="width: 200px" @change="changeRows">
+          </div>
+          <label for="cols">Total Columns: {{ cols }}</label>
+          <div class="form-group">
+            <input id="cols" type="range" class="custom-range" min=1 max=20 value=10 style="width: 200px" @change="changeCols">
+          </div>
+          <label for="cols">Show Rows: {{ minRows }}</label>
+          <div class="form-group">
+            <input id="minRows" type="range" class="custom-range" min=1 max=15 value=10 style="width: 200px" @change="changeMinRows">
+          </div>
+        </div>
+        <div class="col-8">
+          <div id="pagedtable"></div>
+        </div>
+      </div>
+    </div>
+    <script type="application/javascript">
+      var app = new Vue({
+        el: '#app',
+        data: {
+          rows: 50,
+          cols: 10,
+          minRows: 10
+        },
+        methods: {
+          updatePaged: function() {
+            var dataframe = { data: [], options: {
+              rows: { min: this.minRows, max: this.minRows }
+            }};
+            for (var idxRow = 0; idxRow < this.rows; idxRow++) {
+              dataframe.data[idxRow] = {};
+              for (var idxCol = 0; idxCol < this.cols; idxCol++) {
+                dataframe.data[idxRow]["C" + idxCol] = ((Math.floor(10000 * Math.random())) / 100).toString();
+              }
+            }
+
+            var pagedTableElem = document.getElementById("pagedtable");
+            pagedTableElem.innerHTML = "";
+
+            var pagedTable = new PagedTable(pagedTableElem, dataframe);
+            pagedTable.init();
+          },
+          changeRows: function(event) {
+            this.rows = event.target.value;
+            this.updatePaged();
+          },
+          changeCols: function(event) {
+            this.cols = event.target.value;
+            this.updatePaged();
+          },
+          changeMinRows: function(event) {
+            this.minRows = event.target.value;
+            this.updatePaged();
+          }
+        },
+        mounted: function() {
+          this.updatePaged();
+        }
+      })
+    </script>
+  </body>
+</html>
