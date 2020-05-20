@@ -167,7 +167,7 @@ var PagedTable = function (pagedTable, source) {
     if (typeof(source.data) === "undefined") {
       source.data = source;
     }
-    
+
     if (typeof(source.columns) === "undefined") {
       var columns = []
       var keys = Object.keys(source.data[0]);
@@ -175,10 +175,7 @@ var PagedTable = function (pagedTable, source) {
         columns[idx] = { name: keys[idx] };
       }
 
-      source = {
-        data: source,
-        columns: columns
-      };
+      source.columns = columns;
     }
     // if the column contains an array of names, not dictionary
     else if (typeof(source.columns[0].length) !== "undefined") {
@@ -187,10 +184,7 @@ var PagedTable = function (pagedTable, source) {
         columns[idx] = { name: source.columns[idx] };
       }
 
-      source = {
-        data: source.data,
-        columns: columns
-      };
+      source.columns = columns;
     }
 
     for (var idx = 0; idx < source.columns.length ; idx++) {
