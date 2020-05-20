@@ -407,7 +407,9 @@ var PagedTable = function (pagedTable, source) {
         );
 
         for (var idxRow = 0; idxRow < Math.min(widthsLookAhead, data.length); idxRow++) {
-          maxChars = Math.max(maxChars, data[idxRow][column.name.toString()].length);
+          var content = data[idxRow][column.name.toString()];
+          if (typeof(content) !== "string") content = content.toString();
+          maxChars = Math.max(maxChars, content.length);
         }
 
         me.widths[column.name] = {
@@ -721,6 +723,7 @@ var PagedTable = function (pagedTable, source) {
         var dataCell = dataRow[cellName];
         var htmlCell = document.createElement("td");
 
+        if (typeof(dataCell) !== "string") dataCell = dataCell.toString();
         if (dataCell === "NA") htmlCell.setAttribute("class", "pagedtable-na-cell");
         if (dataCell === "__NA__") dataCell = "NA";
 
