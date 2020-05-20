@@ -331,7 +331,8 @@ var PagedTable = function (pagedTable, source) {
       style.appendChild(document.createTextNode(pagedTableStyle));
     }
 
-    var useShadowDOM = !source.options || !!source.options.shadowDom;
+    var useShadowDOM = typeof(source.options) === "undefined" ||
+                       typeof(source.options.shadowDom) === "undefined" || source.options.shadowDom;
     if ((document.head.createShadowRoot || document.head.attachShadow) && useShadowDOM) {
       pagedTable = pagedTable.attachShadow({mode: 'open'});
       pagedTable.appendChild(style);
@@ -1123,6 +1124,8 @@ var PagedTable = function (pagedTable, source) {
     if (tableDiv.clientWidth <= 0) {
       retryFit();
     }
+
+    return me;
   };
 
   var registerWidths = function() {
@@ -1343,10 +1346,26 @@ var PagedTableDoc;
       pagedTable.setAttribute("pagedtable-page", 0);
       pagedTable.setAttribute("class", "pagedtable-wrapper");
 
-      var pagedTableInstance = new PagedTable(pagedTable);
-      pagedTableInstance.init();
+      if (pagedTable.hasAttribute("data-pagedtable-source")) {
+        var xmlhttp = new XMLHttpRequest();
+        var url = pagedTable.getAttribute("data-pagedtable-source");
 
-      allPagedTables.push(pagedTableInstance);
+        xmlhttp.onreadystatechange = function() {
+          if (this.readyState == 4 && this.status == 200) {
+            var source = JSON.parse(this.responseText);
+
+            allPagedTables.push((new PagedTable(pagedTable, source)).init());
+          }
+        };
+        xmlhttp.open("GET", url, true);
+        xmlhttp.send();
+      }
+      else {
+        var pagedTableInstance = new PagedTable(pagedTable);
+        pagedTableInstance.init();
+
+        allPagedTables.push(pagedTableInstance);
+      }
     });
   };
 
