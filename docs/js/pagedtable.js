@@ -152,18 +152,209 @@ if (!Array.prototype.map) {
   };
 }
 
+var pagedTableStyle = "\
+.pagedtable {\
+  overflow: auto;\
+  padding-left: 8px;\
+  padding-right: 8px;\
+  color: #333;\
+  font-family: \"Helvetica Neue\",Helvetica,Arial,sans-serif;\
+  font-size: 14px;\
+}\
+\
+.pagedtable-wrapper {\
+  border-radius: 4px;\
+}\
+\
+.pagedtable table {\
+  width: 100%;\
+  max-width: 100%;\
+  margin: 0;\
+}\
+\
+.pagedtable th {\
+  padding: 0 5px 3px 5px;\
+  border: none;\
+  border-bottom: 2px solid #dddddd;\
+\
+  min-width: 45px;\
+}\
+\
+.pagedtable-empty th {\
+  display: none;\
+}\
+\
+.pagedtable td {\
+  padding: 8px 8px 8px 8px;\
+}\
+\
+.pagedtable .even {\
+  background-color: rgba(140, 140, 140, 0.1);\
+}\
+\
+.pagedtable-padding-col {\
+  display: none;\
+}\
+\
+.pagedtable a {\
+  -webkit-touch-callout: none;\
+  -webkit-user-select: none;\
+  -khtml-user-select: none;\
+  -moz-user-select: none;\
+  -ms-user-select: none;\
+  user-select: none;\
+}\
+\
+.pagedtable-index-nav {\
+  cursor: pointer;\
+  padding: 0 5px 0 5px;\
+  float: right;\
+  border: 0;\
+}\
+\
+.pagedtable-index-nav-disabled {\
+  cursor: default;\
+  text-decoration: none;\
+  color: #999;\
+}\
+\
+a.pagedtable-index-nav-disabled:hover {\
+  text-decoration: none;\
+  color: #999;\
+}\
+\
+.pagedtable-indexes {\
+  cursor: pointer;\
+  float: right;\
+  border: 0;\
+}\
+\
+.pagedtable-index-current {\
+  cursor: default;\
+  text-decoration: none;\
+  font-weight: bold;\
+  color: #333;\
+  border: 0;\
+}\
+\
+a.pagedtable-index-current:hover {\
+  text-decoration: none;\
+  font-weight: bold;\
+  color: #333;\
+}\
+\
+.pagedtable-index {\
+  width: 30px;\
+  display: inline-block;\
+  text-align: center;\
+  border: 0;\
+}\
+\
+.pagedtable-index-separator-left {\
+  display: inline-block;\
+  color: #333;\
+  font-size: 9px;\
+  padding: 0 0 0 0;\
+  cursor: default;\
+}\
+\
+.pagedtable-index-separator-right {\
+  display: inline-block;\
+  color: #333;\
+  font-size: 9px;\
+  padding: 0 4px 0 0;\
+  cursor: default;\
+}\
+\
+.pagedtable-footer {\
+  padding-top: 4px;\
+  padding-bottom: 5px;\
+}\
+\
+.pagedtable-not-empty .pagedtable-footer {\
+  border-top: 2px solid #dddddd;\
+}\
+\
+.pagedtable-info {\
+  overflow: hidden;\
+  color: #999;\
+  white-space: nowrap;\
+  text-overflow: ellipsis;\
+}\
+\
+.pagedtable-header-name {\
+  overflow: hidden;\
+  text-overflow: ellipsis;\
+}\
+\
+.pagedtable-header-type {\
+  color: #999;\
+  font-weight: 400;\
+}\
+\
+.pagedtable-na-cell {\
+  font-style: italic;\
+  opacity: 0.3;\
+}\
+";
+
 var PagedTable = function (pagedTable, source) {
   var me = this;
 
-  var pagedTable = function(pagedTable) {
+  var source = function(pagedTable, source) {
+    if (typeof(source) === "undefined") {
+      var sourceElems = [].slice.call(pagedTable.children).filter(function(e) {
+        return e.hasAttribute("data-pagedtable-source");
+      });
+
+      if (sourceElems === null || sourceElems.length !== 1) {
+        throw("A single data-pagedtable-source was not found");
+      }
+
+      source = JSON.parse(sourceElems[0].innerHTML);
+    }
+
+    return source;
+  }(pagedTable, source);
+
+  var pagedTable = function(pagedTable, source) {
     if (typeof(pagedTable) === "string") {
       pagedTable = document.getElementById(pagedTable);
     }
 
-    return pagedTable;
-  }(pagedTable);
+    // custom style
+    var appliedStyle = pagedTableStyle;
+    var styleElems = [].slice.call(pagedTable.children).filter(function(e) {
+      return e.nodeName === "STYLE";
+    });
+    if (styleElems !== null && styleElems.length === 1) {
+      appliedStyle = appliedStyle + styleElems[0].innerHTML;
+    }
 
-  var validateSource = function(source) {
+    // create style
+    var style = document.createElement('style');
+    style.type = 'text/css';
+    if (style.styleSheet) {
+      style.styleSheet.cssText = appliedStyle; // IE8 and below.
+    } else {
+      style.appendChild(document.createTextNode(appliedStyle));
+    }
+
+    var useShadowDOM = typeof(source.options) === "undefined" ||
+                       typeof(source.options.shadowDOM) === "undefined" || source.options.shadowDOM;
+    if ((document.head.createShadowRoot || document.head.attachShadow) && useShadowDOM) {
+      pagedTable = pagedTable.attachShadow({mode: 'open'});
+      pagedTable.appendChild(style);
+    }
+    else {
+      var head = document.head || document.getElementsByTagName('head')[0];
+      head.appendChild(style);
+    }
+
+    return pagedTable;
+  }(pagedTable, source);
+
+  source = function(source) {
     if (typeof(source.data) === "undefined") {
       source.data = source;
     }
@@ -193,23 +384,7 @@ var PagedTable = function (pagedTable, source) {
     }
 
     return source;
-  }
-
-  var source = function(pagedTable, source) {
-    if (typeof(source) === "undefined") {
-      var sourceElems = [].slice.call(pagedTable.children).filter(function(e) {
-        return e.hasAttribute("data-pagedtable-source");
-      });
-
-      if (sourceElems === null || sourceElems.length !== 1) {
-        throw("A single data-pagedtable-source was not found");
-      }
-
-      source = JSON.parse(sourceElems[0].innerHTML);
-    }
-
-    return validateSource(source);
-  }(pagedTable, source);
+  }(source);
 
   var options = function(source) {
     var options = typeof(source.options) !== "undefined" &&
@@ -958,6 +1133,8 @@ var PagedTable = function (pagedTable, source) {
     if (tableDiv.clientWidth <= 0) {
       retryFit();
     }
+
+    return me;
   };
 
   var registerWidths = function() {
@@ -1178,10 +1355,26 @@ var PagedTableDoc;
       pagedTable.setAttribute("pagedtable-page", 0);
       pagedTable.setAttribute("class", "pagedtable-wrapper");
 
-      var pagedTableInstance = new PagedTable(pagedTable);
-      pagedTableInstance.init();
+      if (pagedTable.hasAttribute("data-pagedtable-source")) {
+        var xmlhttp = new XMLHttpRequest();
+        var url = pagedTable.getAttribute("data-pagedtable-source");
 
-      allPagedTables.push(pagedTableInstance);
+        xmlhttp.onreadystatechange = function() {
+          if (this.readyState == 4 && this.status == 200) {
+            var source = JSON.parse(this.responseText);
+
+            allPagedTables.push((new PagedTable(pagedTable, source)).init());
+          }
+        };
+        xmlhttp.open("GET", url, true);
+        xmlhttp.send();
+      }
+      else {
+        var pagedTableInstance = new PagedTable(pagedTable);
+        pagedTableInstance.init();
+
+        allPagedTables.push(pagedTableInstance);
+      }
     });
   };
 
