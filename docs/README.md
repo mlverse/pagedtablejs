@@ -3,14 +3,19 @@
 To use `pagedtable.js` first include its javascript source:
 
 ```html
-<script type="text/javascript" src="https://raw.githubusercontent.com/mlverse/pagedtablejs/master/js/pagedtable.js"></script>
+<script type="text/javascript" src="https://mlverse.github.io/pagedtablejs/data/iris.json"></script>
 ```
 
 You can then easily create a table with the JSON from a URL:
 
 ```html
-/*preview*/
 <div data-pagedtable data-pagedtable-source="http://learnjsdata.com/data/employees.json"></div>
+```
+```html
+/*display*/
+<div data-pagedtable>
+  <script data-pagedtable-source type="application/json">[{"Sepal.Length":5.1,"Sepal.Width":3.5,"Petal.Length":1.4,"Petal.Width":0.2,"Species":"setosa"},{"Sepal.Length":4.9,"Sepal.Width":3,"Petal.Length":1.4,"Petal.Width":0.2,"Species":"setosa"},{"Sepal.Length":4.7,"Sepal.Width":3.2,"Petal.Length":1.3,"Petal.Width":0.2,"Species":"setosa"},{"Sepal.Length":4.6,"Sepal.Width":3.1,"Petal.Length":1.5,"Petal.Width":0.2,"Species":"setosa"},{"Sepal.Length":5,"Sepal.Width":3.6,"Petal.Length":1.4,"Petal.Width":0.2,"Species":"setosa"}]</script>
+</div>
 ```
 
 Or by embedding JSON directly into your HTML as follows:
