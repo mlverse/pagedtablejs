@@ -49,8 +49,10 @@
 
             var pagedTableElem = document.getElementById("pagedtable");
             pagedTableElem.innerHTML = "";
+            var pagedTableElem2 = document.createElement("div");
+            pagedTableElem.appendChild(pagedTableElem2);
 
-            var pagedTable = new PagedTable(pagedTableElem, dataframe);
+            var pagedTable = new PagedTable(pagedTableElem2, dataframe);
             pagedTable.init();
           },
           changeRows: function(event) {
