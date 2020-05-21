@@ -350,7 +350,7 @@ var PagedTable = function (pagedTable, source) {
       }
     }
     catch(e) {
-      Console.log("Failed to use shadow DOM: " + e.toString());
+      console.log("Failed to use shadow DOM: " + e.toString());
       useShadowDOM = false;
     }
 
