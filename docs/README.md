@@ -3,13 +3,13 @@
 To use `pagedtable.js` first include its javascript source:
 
 ```html
-<script type="text/javascript" src="https://mlverse.github.io/pagedtablejs/data/iris.json"></script>
+<script type="text/javascript" src="js/pagedtable.js"></script>
 ```
 
 You can then easily create a table with the JSON from a URL:
 
 ```html
-<div data-pagedtable data-pagedtable-source="http://learnjsdata.com/data/employees.json"></div>
+<div data-pagedtable data-pagedtable-source="https://mlverse.github.io/pagedtablejs/data/iris.json"></div>
 ```
 ```html
 /*display*/
