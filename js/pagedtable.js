@@ -322,17 +322,26 @@ var PagedTable = function (pagedTable, source) {
       pagedTable = document.getElementById(pagedTable);
     }
 
+    // custom style
+    var appliedStyle = pagedTableStyle;
+    var styleElems = [].slice.call(pagedTable.children).filter(function(e) {
+      return e.nodeName === "STYLE";
+    });
+    if (styleElems !== null && styleElems.length === 1) {
+      appliedStyle = appliedStyle + styleElems[0].innerHTML;
+    }
+
     // create style
     var style = document.createElement('style');
     style.type = 'text/css';
     if (style.styleSheet) {
-      style.styleSheet.cssText = pagedTableStyle; // IE8 and below.
+      style.styleSheet.cssText = appliedStyle; // IE8 and below.
     } else {
-      style.appendChild(document.createTextNode(pagedTableStyle));
+      style.appendChild(document.createTextNode(appliedStyle));
     }
 
     var useShadowDOM = typeof(source.options) === "undefined" ||
-                       typeof(source.options.shadowDom) === "undefined" || source.options.shadowDom;
+                       typeof(source.options.shadowDOM) === "undefined" || source.options.shadowDOM;
     if ((document.head.createShadowRoot || document.head.attachShadow) && useShadowDOM) {
       pagedTable = pagedTable.attachShadow({mode: 'open'});
       pagedTable.appendChild(style);
