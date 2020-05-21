@@ -342,11 +342,19 @@ var PagedTable = function (pagedTable, source) {
 
     var useShadowDOM = typeof(source.options) === "undefined" ||
                        typeof(source.options.shadowDOM) === "undefined" || source.options.shadowDOM;
-    if ((document.head.createShadowRoot || document.head.attachShadow) && useShadowDOM) {
-      pagedTable = pagedTable.attachShadow({mode: 'open'});
-      pagedTable.appendChild(style);
+    useShadowDOM = (document.head.createShadowRoot || document.head.attachShadow) && useShadowDOM;
+    try {
+      if (useShadowDOM) {
+        pagedTable = pagedTable.attachShadow({mode: 'open'});
+        pagedTable.appendChild(style);
+      }
     }
-    else {
+    catch(e) {
+      Console.log("Failed to use shadow DOM: " + e.toString());
+      useShadowDOM = false;
+    }
+
+    if (!useShadowDOM) {
       var head = document.head || document.getElementsByTagName('head')[0];
       head.appendChild(style);
     }
