@@ -1393,3 +1393,11 @@ var PagedTableDoc;
 window.onload = function() {
   PagedTableDoc.initAll();
 };
+
+pagedtable = {
+  create: function(dataframe, element, options) {
+    if (typeof(options) === "undefined") options = {};
+    (new PagedTable(element, Object.assign(dataframe, { options: options }))).init();
+    return dataframe;
+  }
+};

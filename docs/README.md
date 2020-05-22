@@ -129,18 +129,14 @@ You can also create a paged table programmatically by creating the `PagedTable` 
 /*preview*/
 <div id="pagedtable"></div>
 <script type="application/javascript">
-  var dataframe = {
-    "columns": [{ "name": "letter" }, { "name": "number" }],
-    "data": []
-  };
-
+  // create a data frame
+  var dataframe = []
   for (var idx = 0; idx < 26; idx++) {
-    dataframe.data[idx] = { letter: String.fromCharCode('A'.charCodeAt(0) + idx), number: idx + 1 };
+    dataframe[idx] = { letter: String.fromCharCode('A'.charCodeAt(0) + idx), number: idx + 1 };
   }
-  
-  var pagedTableElem = document.getElementById("pagedtable");
-  var pagedTable = new PagedTable(pagedTableElem, dataframe);
-  pagedTable.init()
+
+  // create a paged table
+  pagedtable.create(dataframe, "pagedtable", { rows: { min: 4 } });
 </script>
 ```
 
