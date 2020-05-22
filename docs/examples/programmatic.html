@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script type="text/javascript" src="../js/pagedtable.js"></script>
+  </head>
+  <body>
+    <div id="pagedtable" style="width: 25%; margin: 100px auto auto auto;"></div>
+    <script type="application/javascript">
+      // create a data frame
+      var dataframe = []
+      for (var idx = 0; idx < 26; idx++) {
+        dataframe[idx] = { letter: String.fromCharCode('A'.charCodeAt(0) + idx), number: idx + 1 };
+      }
+
+      // create a paged table
+      pagedtable.create(dataframe, "pagedtable");
+    </script>
+  </body>
+</html>
