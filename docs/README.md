@@ -136,7 +136,7 @@ You can also create a paged table programmatically by creating the `PagedTable` 
   }
 
   // create a paged table
-  pagedtable.create(dataframe, "pagedtable", { rows: { min: 4 } });
+  pagedtable.create(dataframe, "pagedtable");
 </script>
 ```
 
