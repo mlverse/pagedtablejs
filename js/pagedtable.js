@@ -574,7 +574,7 @@ var PagedTable = function (pagedTable, source) {
     };
 
     me.number = 0;
-    me.visible = columns.length;
+    me.visible = columns.length ;
     me.total = columns.length;
     me.subset = [];
     me.padding = 0;
@@ -876,7 +876,7 @@ var PagedTable = function (pagedTable, source) {
     // If the column already exists, toggle its visibility, otherwise create it.
     var colExists = pt_header.querySelector(".col_" + column_idx) != null;
     if(colExists){
-      me.toggleColumn(column_idx);
+      me.toggleColumn("col_" + column_idx);
     }else{
       var header_element = makeColumnHeaderElement(column_idx);
       var body_elements = makeColumnBodyElements(column_idx);
@@ -900,66 +900,52 @@ var PagedTable = function (pagedTable, source) {
      
   };
   
-  me.animateColumns = function(backwards) {
+  var ForEach = function(array, direction, func){
     
-    var thead = pagedTable.querySelectorAll("thead")[0];
-
-    var headerOld = thead.querySelectorAll("tr")[0];
-    var tbodyOld = table.querySelectorAll("tbody")[0];
+    var arr = array;
+    
+    if(direction){
+      arr = arr.slice().reverse();
+    }
+    
+    arr.forEach(func);
+  }
+  
+  me.animateColumns = function(backwards) {
     
     var currentCols = columns.visCols
 
     var startCol = backwards ? currentCols[0] -1 : currentCols[currentCols.length - 1] + 1 ; 
     
-    
+    currentCols.forEach
 
     me.addTableContents(startCol, backwards);
-
-    //renderHeader(false);
-
-    header.style.opacity = "0";
-    header.style.transform = backwards ? "translateX(-30px)" : "translateX(30px)";
-    header.style.transition = "transform 200ms linear, opacity 200ms";
-    header.style.transitionDelay = "0";
-
-    //renderBody(false);
-
-    if (headerOld) {
-      headerOld.style.position = "absolute";
-      headerOld.style.transform = "translateX(0px)";
-      headerOld.style.opacity = "1";
-      headerOld.style.transition = "transform 100ms linear, opacity 100ms";
-      headerOld.setAttribute("class", "pagedtable-remove-head");
-      if (headerOld.style.transitionEnd) {
-        headerOld.addEventListener("transitionend", function() {
-          var headerOldByClass = thead.querySelector(".pagedtable-remove-head");
-          if (headerOldByClass) thead.removeChild(headerOldByClass);
-        });
-      }
-      else {
-        thead.removeChild(headerOld);
-      }
+    
+    var newCols = columns.visCols
+    
+    // disappear the old columns
+    
+    ForEach(currentCols, backwards, function(col_idx){
+      me.toggleColumn("col_" + col_idx);
+    })
+    
+    if(newCols.includes(columns.total-1)){
+      me.toggleColumnNavigation("left");
     }
-
-    if (tbodyOld) table.removeChild(tbodyOld);
-
-    tbody.style.opacity = "0";
-    tbody.style.transition = "transform 200ms linear, opacity 200ms";
-    tbody.style.transitionDelay = "0ms";
-
-    // force relayout
-    window.getComputedStyle(header).opacity;
-    window.getComputedStyle(tbody).opacity;
-
-    if (headerOld) {
-      headerOld.style.transform = backwards ? "translateX(20px)" : "translateX(-30px)";
-      headerOld.style.opacity = "0";
+    
+    
+    if(currentCols[0] === 0 & !newCols.includes(0)){
+      me.toggleColumnNavigation("right")
     }
-
-    header.style.transform = "translateX(0px)";
-    header.style.opacity = "1";
-
-    tbody.style.opacity = "1";
+    
+    if(currentCols[currentCols.length - 1] === columns.total-1 & backwards){
+      me.toggleColumnNavigation("left")
+    }
+    
+    if(newCols.includes(0) & !currentCols.includes(0)){
+      me.toggleColumnNavigation("right");
+    }
+    
   }
 
   me.onChange = function(callback) {
@@ -1272,9 +1258,6 @@ var PagedTable = function (pagedTable, source) {
   };
   
   me.addTableContents = function(startCol, backwards){
-    
-    measurer.calculate(measuresCell);
-    columns.calculateWidths(measurer.measures);
 
     if (tableDiv.clientWidth > 0) {
       tableDiv.style.opacity = 1;
@@ -1332,13 +1315,11 @@ var PagedTable = function (pagedTable, source) {
       visibleColumns.push(columnNumber)
 
       // dont try to add more fields columns than exist      
-      if( (columnNumber  == 0 & backwards) ){
-        me.toggleColumnNavigation("right");
+      if( (columnNumber  === 0 & backwards) ){
         break
       }
       
-      if( (columnNumber == columns.total & !backwards)){
-        me.toggleColumnNavigation("left");
+      if( (columnNumber === columns.total-1 & !backwards)){
         break
       }
       
@@ -1348,6 +1329,10 @@ var PagedTable = function (pagedTable, source) {
       } else {
         columnNumber += 1;
       }
+    }
+    
+    if(backwards){
+      visibleColumns = visibleColumns.slice().reverse();
     }
     
     columns.setVisibleColumns(visibleColumns)
@@ -1421,137 +1406,12 @@ var PagedTable = function (pagedTable, source) {
     page.setRows(rows);
   }
 
-  // The goal of this function is to add as many columns as possible
-  // starting from left-to-right, when the right most limit is reached
-  // it tries to add columns from the left as well.
-  //
-  // When startBackwards is true columns are added from right-to-left
-  //
-  // 06/04/2020 EHH
-  // To prevent double calculation of column width, this function will
-  // now be used to create columns as well.
-  // 
-  me.fitColumns = function(startcol, backwards) {
-    
-    measurer.calculate(measuresCell);
-    columns.calculateWidths(measurer.measures);
-
-    if (tableDiv.clientWidth > 0) {
-      tableDiv.style.opacity = 1;
-    }
-
-    var visibleColumns = tableDiv.clientWidth <= 0 ? Math.max(columns.min, 1) : 1;
-    var columnNumber = columns.number;
-    var paddingCount = 0;
-
-    // track a list of added columns as we build the visible ones to allow us
-    // to remove columns when they don't fit anymore.
-    var columnHistory = [];
-
-    var lastTableHeight = 0;
-
-    var tableDivStyle = window.getComputedStyle(tableDiv, null);
-    var tableDivPadding = parsePadding(tableDivStyle.paddingLeft) +
-      parsePadding(tableDivStyle.paddingRight);
-
-    var addPaddingCol = false;
-    var currentWidth = 0;
-
-    while (true) {
-      columns.setVisibleColumns(columnNumber, visibleColumns, paddingCount);
-      currentWidth = columns.getWidth();
-
-      if (tableDiv.clientWidth - tableDivPadding < currentWidth) {
-        break;
-      }
-
-      columnHistory.push({
-        columnNumber: columnNumber,
-        visibleColumns: visibleColumns,
-        paddingCount: paddingCount
-      });
-
-      if (columnHistory.length > 100) {
-        console.error("More than 100 tries to fit columns, aborting");
-        break;
-      }
-
-      if (columns.max !== null &&
-        columns.visible + columns.getPaddingCount() >= columns.max) {
-        break;
-      }
-
-      // if we run out of right-columns
-      if (!backwards && columnNumber + columns.visible >= columns.total) {
-        // if we started adding right-columns, try adding left-columns
-        if (!startBackwards && columnNumber > 0) {
-          backwards = true;
-        }
-        else if (columns.min === null || visibleColumns + columns.getPaddingCount() >= columns.min) {
-          break;
-        }
-        else {
-          paddingCount = paddingCount + 1;
-        }
-      }
-
-      // if we run out of left-columns
-      if (backwards && columnNumber == 0) {
-        // if we started adding left-columns, try adding right-columns
-        if (startBackwards && columnNumber + columns.visible < columns.total) {
-          backwards = false;
-        }
-        else if (columns.min === null || visibleColumns + columns.getPaddingCount() >= columns.min) {
-          break;
-        }
-        else {
-          paddingCount = paddingCount + 1;
-        }
-      }
-
-      // when moving backwards try fitting left columns first
-      if (backwards && columnNumber > 0) {
-        columnNumber = columnNumber - 1;
-      }
-
-      if (columnNumber + visibleColumns < columns.total) {
-        visibleColumns = visibleColumns + 1;
-      }
-    }
-
-    var lastRenderableColumn = {
-        columnNumber: columnNumber,
-        visibleColumns: visibleColumns,
-        paddingCount: paddingCount
-    };
-
-    if (columnHistory.length > 0) {
-      lastRenderableColumn = columnHistory[columnHistory.length - 1];
-    }
-
-    columns.setVisibleColumns(
-      lastRenderableColumn.columnNumber,
-      lastRenderableColumn.visibleColumns,
-      lastRenderableColumn.paddingCount);
-
-    if (pagedTable.offsetWidth > 0) {
-      page.setVisiblePages(Math.max(Math.ceil(1.0 * (pagedTable.offsetWidth - 250) / 40), 2));
-    }
-
-    registerWidths();
-  };
-
-  me.fit = function(startBackwards) {
-    me.fitRows();
-    me.fitColumns(startBackwards);
-  }
-
   me.render = function() {
     
     // 06/05/2020 EHH
     // Proposal to redraw the frame of the table, then fit in the
     // columns one at a time
-    me.drawTable()
+    //me.drawTable()
     //me.fitColumns(false);
 
     /*
