@@ -154,7 +154,7 @@ if (!Array.prototype.map) {
 
 var pagedTableStyle = "\
 .pagedtable {\
-  overflow: auto;\
+  overflow: hidden;\
   padding-left: 8px;\
   padding-right: 8px;\
   color: #333;\
@@ -401,6 +401,19 @@ var PagedTable = function (pagedTable, source) {
 
     var columns = typeof(options.columns) !== "undefined" ? options.columns : {};
     var rows = typeof(options.rows) !== "undefined" ? options.rows : {};
+    var colhtml = typeof(options.html) !== "undefined" ? options.html : {};
+
+    //if html is not defined for field, assume is not
+    Object.keys(source.data[0]).forEach(function(colname){
+      var colhtml_status = colhtml[colname];
+      if(typeof(colhtml_status) === "undefined"){
+        colhtml_status = false
+      }
+      if(typeof(colhtml_status) !== "boolean"){
+         colhtml_status = false
+      }
+      colhtml[colname] = colhtml_status
+    });
 
     var positiveIntOrNull = function(value, def) {
       return parseInt(value) >= 0 ? parseInt(value) : def;
@@ -417,7 +430,8 @@ var PagedTable = function (pagedTable, source) {
         min: positiveIntOrNull(columns.min, 1),
         max: positiveIntOrNull(columns.max, 10),
         total: positiveIntOrNull(columns.total, null)
-      }
+      },
+      html : colhtml
     };
   }(source);
   
@@ -487,7 +501,7 @@ var PagedTable = function (pagedTable, source) {
     me.visible = me.max;
     me.rows = options.rows.min !== null ? options.rows.min : defaults.rows;
     me.total = totalPages();
-
+    
     me.setRows = function(newRows) {
       me.rows = newRows;
       me.total = totalPages();
@@ -564,6 +578,14 @@ var PagedTable = function (pagedTable, source) {
       var rowEnd = me.getRowEnd();
       return data.length > me.rows ? me.rows - (rowEnd - rowStart) : 0;
     };
+    
+    me.getVisRows = function(){
+      var visRowsPage = [] 
+      for( var i = me.getRowStart(); i < me.getRowEnd(); i++){
+        visRowsPage.push(i);
+      }
+      return visRowsPage
+    }
   };
 
   var Columns = function(data, columns, options) {
@@ -607,7 +629,7 @@ var PagedTable = function (pagedTable, source) {
           column.type ? column.type.toString().length : 0
         );
         
-        if(!source.options[0].html[column.name.toString()]){
+        if(!options.html[column.name.toString()]){
           for (var idxRow = 0; idxRow < Math.min(widthsLookAhead, data.length); idxRow++) {
             var content = data[idxRow][column.name.toString()];
             if (typeof(content) !== "string") content = content.toString();
@@ -623,7 +645,7 @@ var PagedTable = function (pagedTable, source) {
           // width adding outer styles like padding
           outer: maxChars * measures.character + measures.padding,
           // Is width based on internal html
-          html: source.options[0].html[column.name.toString()]
+          html: options.html[column.name.toString()]
         };
       });
     };
@@ -726,8 +748,6 @@ var PagedTable = function (pagedTable, source) {
   // Caches pagedTable.clientWidth, specially for webkit
   var cachedPagedTableClientWidth = null;
 
-  var onChangeCallbacks = [];
-
   var columnNavigationWidthPX = 5;
 
   var renderColumnNavigation = function(direction) {
@@ -808,13 +828,12 @@ var PagedTable = function (pagedTable, source) {
   
   var makeColumnBodyElements = function(idx){
     
-    cachedPagedTableClientWidth = pagedTable.clientWidth
     var columnData = columns.subset[idx]
 
     var fragment = document.createDocumentFragment();
     
     // assumption that all fields have the same keys? valid?
-    var idx_name = Object.keys(data[0])[idx]
+    var idx_name = columnData.name
     
     var column_elements = []
     
@@ -831,11 +850,18 @@ var PagedTable = function (pagedTable, source) {
       if (dataCell === "__NA__") dataCell = "NA";
 
       var cellText = document.createElement('div');
+      cellText.style.width = "fit-content"
       
       //revert for REALSIES // ************************************************************************
       //cellText.innerHTML = makeCellContents(dataCell);
-      //htmlCell.appendChild(cellText);
-      htmlCell.innerHTML = dataCell.trim()
+      if(options.html[idx_name]){
+        cellText.innerHTML = dataCell.trim()
+      }else{
+        var cellText = document.createTextNode(dataCell);
+        htmlCell.appendChild(cellText);
+      }
+      
+      htmlCell.appendChild(cellText);
       if (dataCell.length > 50 & !columns.widths[idx_name]["html"]) {
         htmlCell.setAttribute("title", dataCell);
       }
@@ -867,6 +893,11 @@ var PagedTable = function (pagedTable, source) {
     })
   }
   
+  me.toggleRow = function(rownum){
+    var row = pagedTable.querySelector(".row_" + rownum);
+    row.style.visibility = row.style.visibility == "visible" ? "collapse" : "visible"
+  }
+  
  // to try to prevent double calculation, the columns must be created. 
   me.makeColumn = function(column_idx, backwards){
     // add column to header
@@ -877,7 +908,9 @@ var PagedTable = function (pagedTable, source) {
     var colExists = pt_header.querySelector(".col_" + column_idx) != null;
     if(colExists){
       me.toggleColumn("col_" + column_idx);
+      
     }else{
+      
       var header_element = makeColumnHeaderElement(column_idx);
       var body_elements = makeColumnBodyElements(column_idx);
       
@@ -917,8 +950,6 @@ var PagedTable = function (pagedTable, source) {
 
     var startCol = backwards ? currentCols[0] -1 : currentCols[currentCols.length - 1] + 1 ; 
     
-    currentCols.forEach
-
     me.addTableContents(startCol, backwards);
     
     var newCols = columns.visCols
@@ -929,10 +960,10 @@ var PagedTable = function (pagedTable, source) {
       me.toggleColumn("col_" + col_idx);
     })
     
+    // rules about showing the left/right arrows
     if(newCols.includes(columns.total-1)){
       me.toggleColumnNavigation("left");
     }
-    
     
     if(currentCols[0] === 0 & !newCols.includes(0)){
       me.toggleColumnNavigation("right")
@@ -946,6 +977,18 @@ var PagedTable = function (pagedTable, source) {
       me.toggleColumnNavigation("right");
     }
     
+    renderFooter();
+    
+  }
+  
+  me.updateDisplayedPage = function(oldRows, newRows){
+    oldRows.forEach(function(x){
+      me.toggleRow(x);
+    })
+    
+    newRows.forEach(function(x){
+      me.toggleRow(x);
+    })
   }
 
   me.onChange = function(callback) {
@@ -957,87 +1000,6 @@ var PagedTable = function (pagedTable, source) {
       onChange();
     });
   };
-
-  var clearBody = function() {
-    if (tbody) {
-      table.removeChild(tbody);
-      tbody = null;
-    }
-  };
-
-  var renderBody = function(clear) {
-    
-    cachedPagedTableClientWidth = pagedTable.clientWidth
-
-    var fragment = document.createDocumentFragment();
-
-    var pageData = data.slice(page.getRowStart(), page.getRowEnd());
-
-    pageData.forEach(function(dataRow, idxRow) {
-      var htmlRow = document.createElement("tr");
-      htmlRow.setAttribute("class", (idxRow % 2 !==0) ? "even" : "odd");
-
-      if (columns.hasMoreLeftColumns())
-        htmlRow.appendChild(document.createElement("td"));
-
-      columns.subset.forEach(function(columnData) {
-        var cellName = columnData.name;
-        var dataCell = dataRow[cellName];
-        var htmlCell = document.createElement("td");
-
-        if (typeof(dataCell) !== "string") dataCell = dataCell.toString();
-        if (dataCell === "NA") htmlCell.setAttribute("class", "pagedtable-na-cell");
-        if (dataCell === "__NA__") dataCell = "NA";
-
-        // var cellText = document.createTextNode(dataCell);
-        var cellText = document.createElement('div');
-        cellText.innerHTML = makeCellContents(dataCell);
-        htmlCell.appendChild(cellText);
-        if (dataCell.length > 50) {
-          htmlCell.setAttribute("title", dataCell);
-        }
-        htmlCell.setAttribute("align", columnData.align);
-        htmlCell.style.textAlign = columnData.align;
-        htmlCell.style.maxWidth = maxColumnWidth(null);
-        if (columnData.width) {
-          htmlCell.style.minWidth = htmlCell.style.maxWidth = maxColumnWidth(columnData.width);
-        }
-        htmlRow.appendChild(htmlCell);
-      });
-
-      for (var idx = 0; idx < columns.getPaddingCount(); idx++) {
-        var paddingCol = document.createElement("td");
-        paddingCol.setAttribute("class", "pagedtable-padding-col");
-        htmlRow.appendChild(paddingCol);
-      }
-
-      if (columns.hasMoreRightColumns())
-        htmlRow.appendChild(document.createElement("td"));
-
-      fragment.appendChild(htmlRow);
-    });
-
-    for (var idxPadding = 0; idxPadding < page.getPaddingRows(); idxPadding++) {
-      var paddingRow = document.createElement("tr");
-
-      var paddingCellRow = document.createElement("td");
-      paddingCellRow.innerHTML = "&nbsp;";
-      paddingCellRow.setAttribute("colspan", "100%");
-      paddingRow.appendChild(paddingCellRow);
-
-      fragment.appendChild(paddingRow);
-    }
-
-    if (typeof(clear) == "undefined" || clear) clearBody();
-    tbody = document.createElement("tbody");
-    tbody.appendChild(fragment);
-
-    table.appendChild(tbody);
-  };
-  
-  var renderColumn = function(field) {
-    
-  }
 
   var getLabelInfo = function() {
     var pageStart = page.getRowStart();
@@ -1051,11 +1013,11 @@ var PagedTable = function (pagedTable, source) {
     if (totalRows < page.rows) {
       infoText = totalRowsLabel + " row" + (totalRows != 1 ? "s" : "");
     }
-    if (columns.total > columns.visible) {
+    if (columns.total > columns.visCols.length) {
       var totalColumnsLabel = options.columns.total ? options.columns.total : columns.total;
 
-      infoText = infoText + " | " + (columns.number + 1) + "-" +
-        (Math.min(columns.number + columns.visible, columns.total)) +
+      infoText = infoText + " | " + (columns.visCols[0] + 1) + "-" +
+        (columns.visCols[columns.visCols.length - 1] + 1)  +
         " of " + totalColumnsLabel + " columns";
     }
 
@@ -1075,11 +1037,11 @@ var PagedTable = function (pagedTable, source) {
     pageLink.setAttribute("class", pageLinkClass);
     pageLink.setAttribute("data-page-index", idxPage);
     pageLink.onclick = function() {
+      var oldRows = page.getVisRows()
       page.setPageNumber(parseInt(this.getAttribute("data-page-index")));
-      renderBody();
+      var newRows = page.getVisRows()
+      me.updateDisplayedPage(oldRows, newRows);
       renderFooter();
-
-      triggerOnChange();
     };
 
     pageLink.appendChild(document.createTextNode(idxPage + 1));
@@ -1092,13 +1054,15 @@ var PagedTable = function (pagedTable, source) {
 
     var next = document.createElement("a");
     next.appendChild(document.createTextNode("Next"));
+    
     next.onclick = function() {
+      var oldRows = page.getVisRows()
       page.setPageNumber(page.number + 1);
-      renderBody();
+      var newRows = page.getVisRows()
+      me.updateDisplayedPage(oldRows, newRows);
       renderFooter();
-
-      triggerOnChange();
     };
+    
     if (data.length > page.rows) footer.appendChild(next);
 
     var pageNumbers = document.createElement("div");
@@ -1137,11 +1101,11 @@ var PagedTable = function (pagedTable, source) {
     var previous = document.createElement("a");
     previous.appendChild(document.createTextNode("Previous"));
     previous.onclick = function() {
+      var oldRows = page.getVisRows()
       page.setPageNumber(page.number - 1);
-      renderBody();
+      var newRows = page.getVisRows()
+      me.updateDisplayedPage(oldRows, newRows);
       renderFooter();
-
-      triggerOnChange();
     };
     if (data.length > page.rows) footer.appendChild(previous);
 
@@ -1227,11 +1191,18 @@ var PagedTable = function (pagedTable, source) {
     tableheader_row.appendChild(renderColumnNavigation("left"));
     tableheader_row.appendChild(renderColumnNavigation("right"));
     
+    var visRowsPage = page.getVisRows()
+    
     //Body
     data.forEach(function(dataRow, idxRow) {
       
       var htmlRow = document.createElement("tr");
       htmlRow.setAttribute("class", ((idxRow % 2 !==0) ? "even" : "odd") + " row_"+idxRow);
+      if(visRowsPage.includes(idxRow)){
+          htmlRow.style.visibility = "visible";
+      }else{
+          htmlRow.style.visibility = "collapse";
+      }
       
       var left_nav_cell = document.createElement("td");
       left_nav_cell.setAttribute("class","right-navigator-column");
@@ -1266,17 +1237,10 @@ var PagedTable = function (pagedTable, source) {
     var visibleColumns = []
     var columnNumber = startCol;
 
-    // track a list of added columns as we build the visible ones to allow us
-    // to remove columns when they don't fit anymore.
-    var columnHistory = [];
-
-    var lastTableHeight = 0;
-
     var tableDivStyle = window.getComputedStyle(tableDiv, null);
     var tableDivPadding = parsePadding(tableDivStyle.paddingLeft) +
       parsePadding(tableDivStyle.paddingRight);
 
-    var addPaddingCol = false;
     var currentWidth = 0;
     
     while (true) {
@@ -1293,34 +1257,55 @@ var PagedTable = function (pagedTable, source) {
       me.makeColumn(columnNumber, backwards)
       
       // we do not pre-define html element widths, so who knows how wide it will be?
-      if(columnWidth[0] === 0 & columnWidth[1]){
-        var column = pagedTable.querySelector("table").querySelector("thead").querySelector(".col_" + columnNumber);
-        columnWidth[0] = column.width();
+      if(columnWidth[1]){
+        
+        var html_column = pagedTable.querySelector("table").querySelector("tbody").querySelectorAll(".col_" + columnNumber);
+        // get width for each element and compare against current persribed width
+        html_column.forEach(function(el){
+          columnWidth[0] = Math.max( columnWidth[0], 
+          el.children[0].offsetWidth);
+        })
         currentWidth = currentWidth + columnWidth[0]
         columns.setColWidth(columnNumber, columnWidth[0]);
-        currentWidth = currentWidth + columnWidth[0]
-        
+
         if (tableDiv.clientWidth - tableDivPadding < currentWidth) {
-          
-          // we need to delete column that is too wide!
-          pagedTable.querySelector("table").querySelector(".col_" + columnNumber).map(function(el){
-            el.remove();
-          })
-          
+          // we need to hide the column that is too wide
+          // hiding prevents having to re-generate
+          me.toggleColumn("col_" + columnNumber);
           break;
         }
         
       }
       
       visibleColumns.push(columnNumber)
+      
+      if(columnNumber ===  columns.total -1 ){
+        break
+      }
 
       // dont try to add more fields columns than exist      
       if( (columnNumber  === 0 & backwards) ){
-        break
+        // if we are moving backwards and hit the first column, but did 
+        // not fill the table, repopulate with the "old" columns
+        if( tableDiv.clientWidth - tableDivPadding > currentWidth){
+          backwards = !backwards
+          columnNumber = visibleColumns[0]
+          visibleColumns = visibleColumns.slice().reverse();
+        }else{
+          break
+        }
       }
       
       if( (columnNumber === columns.total-1 & !backwards)){
-        break
+        // if we are moving to the right and hit the last column, but did 
+        // not fill the table, repopulate with the "old" columns
+        if( tableDiv.clientWidth - tableDivPadding > currentWidth & visibleColumns[0] != 0){
+          backwards = !backwards
+          columnNumber = visibleColumns[0]
+          visibleColumns = visibleColumns.slice().reverse();
+        }else{
+          break
+        }
       }
       
       
@@ -1353,7 +1338,13 @@ var PagedTable = function (pagedTable, source) {
     //add table contents
     me.addTableContents(0, false);
     
+    renderFooter();
+
     me.toggleColumnNavigation("right");
+    
+    if(columns.visCols.length === columns.total){
+      me.toggleColumnNavigation("left");
+    }
 
     // retry seizing columns later if the host has not provided space
     function retryFit() {
