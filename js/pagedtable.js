@@ -570,7 +570,7 @@ var PagedTable = function (pagedTable, source) {
 
     me.getRowEnd = function() {
       var rowStart = me.getRowStart();
-      return Math.min(rowStart + me.rows, data.length);
+      return rowStart + me.rows;
     };
 
     me.getPaddingRows = function() {
@@ -842,7 +842,7 @@ var PagedTable = function (pagedTable, source) {
       var dataCell = dataRow[idx_name];
       var htmlCell = document.createElement("td");
       htmlCell.setAttribute("class", "col_" + idx)
-      htmlCell.style.display = "";
+      htmlCell.style.display = "&nbsp";
 
 
       if (typeof(dataCell) !== "string") dataCell = dataCell.toString();
@@ -858,7 +858,6 @@ var PagedTable = function (pagedTable, source) {
         cellText.innerHTML = dataCell.trim()
       }else{
         var cellText = document.createTextNode(dataCell);
-        htmlCell.appendChild(cellText);
       }
       
       htmlCell.appendChild(cellText);
@@ -874,6 +873,41 @@ var PagedTable = function (pagedTable, source) {
       
       column_elements[idxRow] = htmlCell;
     });
+    
+        
+    //extra empty cells to generate
+    var extraRows = data.length % page.rows;
+    
+    if(extraRows != 0){
+      
+      var extraRows = page.rows - extraRows;
+      
+      var idxRow = column_elements.length;
+      var current_row = column_elements.length;
+      
+      while(idxRow < (current_row + extraRows)){
+        
+        var htmlCell = document.createElement("td");
+        htmlCell.setAttribute("class", "col_" + idx)
+        htmlCell.style.display = "";
+
+        var cellText = document.createElement('div');
+        cellText.style.width = "fit-content"
+      
+        cellText.innerHTML = "&nbsp;";
+        htmlCell.appendChild(cellText);
+        
+        htmlCell.setAttribute("align", columnData.align);
+        htmlCell.style.textAlign = columnData.align;
+        htmlCell.style.maxWidth = maxColumnWidth(null);
+        if (columnData.width) {
+          htmlCell.style.minWidth = htmlCell.style.maxWidth = maxColumnWidth(columnData.width);
+        }
+        column_elements[idxRow] = htmlCell;
+        idxRow += 1;
+        }
+    }
+    
     
     return(column_elements)
   };
@@ -892,11 +926,20 @@ var PagedTable = function (pagedTable, source) {
       el.style.display = el.style.display == "none" ? "" : "none"
     })
   }
-  
+
   me.toggleRow = function(rownum){
     var row = pagedTable.querySelector(".row_" + rownum);
     row.style.visibility = row.style.visibility == "visible" ? "collapse" : "visible"
   }
+  
+  me.styleColumn = function(el_class, styles){
+    var coltostyle = pagedTable.querySelectorAll("." + el_class);
+    for(var s in styles) {
+        coltostyle.forEach(function(e){
+          e.style[s] = styles[s];
+        });
+    }    
+  };
   
  // to try to prevent double calculation, the columns must be created. 
   me.makeColumn = function(column_idx, backwards){
@@ -955,7 +998,6 @@ var PagedTable = function (pagedTable, source) {
     var newCols = columns.visCols
     
     // disappear the old columns
-    
     ForEach(currentCols, backwards, function(col_idx){
       me.toggleColumn("col_" + col_idx);
     })
@@ -989,6 +1031,7 @@ var PagedTable = function (pagedTable, source) {
     newRows.forEach(function(x){
       me.toggleRow(x);
     })
+    
   }
 
   me.onChange = function(callback) {
@@ -1041,6 +1084,7 @@ var PagedTable = function (pagedTable, source) {
       page.setPageNumber(parseInt(this.getAttribute("data-page-index")));
       var newRows = page.getVisRows()
       me.updateDisplayedPage(oldRows, newRows);
+      
       renderFooter();
     };
 
@@ -1191,7 +1235,7 @@ var PagedTable = function (pagedTable, source) {
     tableheader_row.appendChild(renderColumnNavigation("left"));
     tableheader_row.appendChild(renderColumnNavigation("right"));
     
-    var visRowsPage = page.getVisRows()
+    var visRowsPage = page.getVisRows();
     
     //Body
     data.forEach(function(dataRow, idxRow) {
@@ -1214,6 +1258,42 @@ var PagedTable = function (pagedTable, source) {
 
       fragment.appendChild(htmlRow);
     });
+    
+     //extra empty cells to generate
+    var extraRows = data.length % page.rows;
+    
+    if(extraRows != 0){
+      
+      var extraRows = page.rows - extraRows;
+      
+      var idx = data.length;
+      var current_row = data.length;
+      
+      while(idx < (current_row + extraRows)){
+        
+        var htmlRow = document.createElement("tr");
+        htmlRow.setAttribute("class", "row_"+ idx);
+        if(visRowsPage.includes(idx)){
+            htmlRow.style.visibility = "visible";
+        }else{
+            htmlRow.style.visibility = "collapse";
+        }
+        
+        var left_nav_cell = document.createElement("td");
+        left_nav_cell.setAttribute("class","right-navigator-column");
+        var right_nav_cell = document.createElement("td");
+        right_nav_cell.setAttribute("class","left-navigator-column");
+        
+        htmlRow.appendChild(left_nav_cell);
+        htmlRow.appendChild(right_nav_cell)
+  
+        fragment.appendChild(htmlRow);
+        idx += 1;
+        }
+    }
+    
+    
+    
 
     tbody = document.createElement("tbody");
     tbody.appendChild(fragment);
@@ -1278,34 +1358,34 @@ var PagedTable = function (pagedTable, source) {
       }
       
       visibleColumns.push(columnNumber)
-      
-      if(columnNumber ===  columns.total -1 ){
-        break
-      }
 
       // dont try to add more fields columns than exist      
-      if( (columnNumber  === 0 & backwards) ){
+      if( columnNumber  === 0 ) {
         // if we are moving backwards and hit the first column, but did 
         // not fill the table, repopulate with the "old" columns
         if( tableDiv.clientWidth - tableDivPadding > currentWidth){
-          backwards = !backwards
-          columnNumber = visibleColumns[0]
-          visibleColumns = visibleColumns.slice().reverse();
-        }else{
+          if( backwards ){
+            backwards = !backwards
+            columnNumber = visibleColumns[0]
+            visibleColumns = visibleColumns.slice().reverse();
+          }
+        } else if( backwards ){
           break
-        }
+        };
       }
       
-      if( (columnNumber === columns.total-1 & !backwards)){
+      if( columnNumber === columns.total-1 ) {
         // if we are moving to the right and hit the last column, but did 
         // not fill the table, repopulate with the "old" columns
-        if( tableDiv.clientWidth - tableDivPadding > currentWidth & visibleColumns[0] != 0){
-          backwards = !backwards
-          columnNumber = visibleColumns[0]
-          visibleColumns = visibleColumns.slice().reverse();
-        }else{
+        if( tableDiv.clientWidth - tableDivPadding > currentWidth ){
+          if( !backwards & visibleColumns[0] != 0){
+            backwards = !backwards
+            columnNumber = visibleColumns[0]
+            visibleColumns = visibleColumns.slice().reverse();
+          }
+        } else if (!backwards & visibleColumns[0] != 0){
           break
-        }
+        };
       }
       
       
@@ -1351,7 +1431,6 @@ var PagedTable = function (pagedTable, source) {
       if (tableDiv.clientWidth <= 0) {
         setTimeout(retryFit, 100);
       } else {
-        me.render();
         triggerOnChange();
       }
     }
@@ -1397,29 +1476,6 @@ var PagedTable = function (pagedTable, source) {
     page.setRows(rows);
   }
 
-  me.render = function() {
-    
-    // 06/05/2020 EHH
-    // Proposal to redraw the frame of the table, then fit in the
-    // columns one at a time
-    //me.drawTable()
-    //me.fitColumns(false);
-
-    /*
-    me.fitColumns(false);
-    
-    // render header/footer to measure height accurately
-    renderHeader();
-    renderFooter();
-
-    me.fitRows();
-    renderBody();
-
-    // re-render footer to match new rows
-    renderFooter();
-    */
-  }
-
   var resizeLastWidth = -1;
   var resizeLastHeight = -1;
   var resizeNewWidth = -1;
@@ -1441,7 +1497,6 @@ var PagedTable = function (pagedTable, source) {
         setTimeout(resizeDelayed, 200);
         resizePending = true;
       } else {
-        me.render();
         triggerOnChange();
 
         resizeLastWidth = -1;
