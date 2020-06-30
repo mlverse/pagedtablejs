@@ -301,9 +301,7 @@ a.pagedtable-index-current:hover {\
 var PagedTable = function (pagedTable, source) {
   
   //Setup functions
-  
-  //set "this" as "me" <- why?
-  var me = this;
+    var me = this;
   
   // immediately evaluate and extract/parse "source" w/ some error handling
   var source = function(pagedTable, source) {
@@ -878,7 +876,7 @@ var PagedTable = function (pagedTable, source) {
     //extra empty cells to generate
     var extraRows = data.length % page.rows;
     
-    if(extraRows != 0){
+    if(extraRows != 0 & page.total != 1){
       
       var extraRows = page.rows - extraRows;
       
@@ -1262,7 +1260,7 @@ var PagedTable = function (pagedTable, source) {
      //extra empty cells to generate
     var extraRows = data.length % page.rows;
     
-    if(extraRows != 0){
+    if(extraRows != 0 & page.total != 1){
       
       var extraRows = page.rows - extraRows;
       
@@ -1382,8 +1380,10 @@ var PagedTable = function (pagedTable, source) {
             backwards = !backwards
             columnNumber = visibleColumns[0]
             visibleColumns = visibleColumns.slice().reverse();
+          } else if( !backwards & visibleColumns[0] == 0 ){
+            break
           }
-        } else if (!backwards & visibleColumns[0] != 0){
+        } else if( !backwards ){
           break
         };
       }
@@ -1447,6 +1447,49 @@ var PagedTable = function (pagedTable, source) {
       return column;
     });
   };
+  
+  
+  me.updateView = function() {
+    renderMeasures();
+    measurer.calculate(measuresCell);
+    columns.calculateWidths(measurer.measures);
+    
+    var currentCols = columns.visCols
+    
+    // hide current columns
+    ForEach(currentCols, false, function(col_idx){
+      me.toggleColumn("col_" + col_idx);
+    })
+    
+    // add table contents
+    me.addTableContents(currentCols[0], false);
+    
+    var newCols  = columns.visCols
+    
+    // toggle "right" navigator
+    if(currentCols[currentCols.length -1] == (columns.total-1)){
+      if(newCols[newCols.length -1] != (columns.total-1)){
+        me.toggleColumnNavigation("left", true);
+      }
+    }else{
+      if(newCols[newCols.length -1] == (columns.total-1)){
+        me.toggleColumnNavigation("left", true);
+      }
+    }
+
+    // toggle "left" navigator
+    if(currentCols[0] == 0){
+      if(newCols[0] != 0){
+        me.toggleColumnNavigation("right", true);
+      }
+    }else{
+      if(newCols[0] == 0){
+        me.toggleColumnNavigation("right", true);
+      }
+    }
+    
+    renderFooter();
+  }
 
   var parsePadding = function(value) {
     return parseInt(value) >= 0 ? parseInt(value) : 0;
@@ -1549,7 +1592,7 @@ var PagedTableDoc;
 
   PagedTableDoc.resizeAll = function() {
     allPagedTables.forEach(function(pagedTable) {
-      pagedTable.render();
+      pagedTable.updateView();
     });
   };
 
