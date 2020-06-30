@@ -1527,7 +1527,14 @@ var PagedTable = function (pagedTable, source) {
     
     let difference = newCols.filter(x => !currentCols.includes(x));
     
-    graduate_new_columns(difference, false, 500)
+    ForEach(difference, false, function(col_idx){
+      me.styleColumn("col_" + col_idx,{
+        opacity:0,
+        transition: ""
+      });
+    })
+    
+    graduate_new_columns(difference, false, 100)
     
     
     // "redisplay" current nav bars
