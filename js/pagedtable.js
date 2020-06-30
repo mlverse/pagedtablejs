@@ -770,6 +770,7 @@ var PagedTable = function (pagedTable, source) {
       columns.incColumnNumber(direction != "right");
       me.animateColumns(direction != "right");
       renderFooter();
+      graduate_new_columns(columns.visCols, direction != "right");
     };
     
     header.on
@@ -949,7 +950,6 @@ var PagedTable = function (pagedTable, source) {
     var colExists = pt_header.querySelector(".col_" + column_idx) != null;
     if(colExists){
       me.toggleColumn("col_" + column_idx);
-      
     }else{
       
       var header_element = makeColumnHeaderElement(column_idx);
@@ -970,8 +970,13 @@ var PagedTable = function (pagedTable, source) {
           row.querySelector(".left-navigator-column").before(el);
         }
       })
+      
+      me.styleColumn("col_" + column_idx,{
+        opacity:0,
+        transition: "",
+      })
     }
-     
+
   };
   
   var ForEach = function(array, direction, func){
@@ -983,6 +988,19 @@ var PagedTable = function (pagedTable, source) {
     }
     
     arr.forEach(func);
+  }
+  
+  var graduate_new_columns = function(cols, direction, delay){
+    
+    delay = typeof delay !== 'undefined' ? delay : 100;
+    
+    ForEach(cols, direction, function(col_idx){
+      setTimeout(function(){
+        me.styleColumn("col_" + col_idx,{
+          opacity : "1",
+          transition : "opacity 200ms"
+        })}, delay);
+    })
   }
   
   me.animateColumns = function(backwards) {
@@ -998,6 +1016,10 @@ var PagedTable = function (pagedTable, source) {
     // disappear the old columns
     ForEach(currentCols, backwards, function(col_idx){
       me.toggleColumn("col_" + col_idx);
+      me.styleColumn("col_" + col_idx,{
+        opacity: 0,
+        transition: "",
+      })
     })
     
     // rules about showing the left/right arrows
@@ -1008,6 +1030,8 @@ var PagedTable = function (pagedTable, source) {
     if(currentCols[0] === 0 & !newCols.includes(0)){
       me.toggleColumnNavigation("right")
     }
+    
+    graduate_new_columns(newCols, backwards);
     
     if(currentCols[currentCols.length - 1] === columns.total-1 & backwards){
       me.toggleColumnNavigation("left")
@@ -1425,6 +1449,9 @@ var PagedTable = function (pagedTable, source) {
     if(columns.visCols.length === columns.total){
       me.toggleColumnNavigation("left");
     }
+    
+    graduate_new_columns(columns.visCols, false);
+
 
     // retry seizing columns later if the host has not provided space
     function retryFit() {
@@ -1448,13 +1475,21 @@ var PagedTable = function (pagedTable, source) {
     });
   };
   
-  
   me.updateView = function() {
     renderMeasures();
     measurer.calculate(measuresCell);
     columns.calculateWidths(measurer.measures);
     
     var currentCols = columns.visCols
+    
+    //hide current nav bars
+    if(currentCols[0] != 0){
+      me.toggleColumnNavigation("right", true);
+    }
+    if(currentCols[currentCols.length -1 ] != (columns.total -1)){
+      me.toggleColumnNavigation("left", true);
+    }
+    
     
     // hide current columns
     ForEach(currentCols, false, function(col_idx){
@@ -1488,6 +1523,21 @@ var PagedTable = function (pagedTable, source) {
       }
     }
     
+    //If there are new columns, transition them in
+    
+    let difference = newCols.filter(x => !currentCols.includes(x));
+    
+    graduate_new_columns(difference, false, 500)
+    
+    
+    // "redisplay" current nav bars
+    if(currentCols[0] != 0){
+      me.toggleColumnNavigation("right", true);
+    }
+    if(currentCols[currentCols.length -1 ] != (columns.total -1)){
+      me.toggleColumnNavigation("left", true);
+    }
+
     renderFooter();
   }
 
