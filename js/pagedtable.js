@@ -878,7 +878,7 @@ var PagedTable = function (pagedTable, source) {
     //extra empty cells to generate
     var extraRows = data.length % page.rows;
     
-    if(extraRows != 0){
+    if(extraRows != 0 & page.total != 1){
       
       var extraRows = page.rows - extraRows;
       
@@ -1262,7 +1262,7 @@ var PagedTable = function (pagedTable, source) {
      //extra empty cells to generate
     var extraRows = data.length % page.rows;
     
-    if(extraRows != 0){
+    if(extraRows != 0 & page.total != 1){
       
       var extraRows = page.rows - extraRows;
       
@@ -1382,10 +1382,10 @@ var PagedTable = function (pagedTable, source) {
             backwards = !backwards
             columnNumber = visibleColumns[0]
             visibleColumns = visibleColumns.slice().reverse();
+          } else if( !backwards & visibleColumns[0] == 0 ){
+            break
           }
-        } else if (!backwards & visibleColumns[0] != 0){
-          break
-        };
+        }
       }
       
       
