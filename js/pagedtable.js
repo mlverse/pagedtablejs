@@ -855,8 +855,7 @@ var PagedTable = function (pagedTable, source) {
       var cellText = document.createElement('div');
       cellText.style.width = "fit-content"
       
-      //revert for REALSIES // ************************************************************************
-      //cellText.innerHTML = makeCellContents(dataCell);
+      cellText.innerHTML = makeCellContents(dataCell);
       if(options.html[idx_name]){
         cellText.innerHTML = dataCell.trim()
       }else{
