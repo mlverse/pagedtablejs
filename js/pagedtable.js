@@ -624,7 +624,7 @@ var PagedTable = function (pagedTable, source) {
     };
 
     me.calculateWidths = function(measures) {
-      // --> Here is where we want to precompute the html columns.
+      // Here is where we want to precompute the html columns.
       columns.forEach(function(column) {
         var maxChars = Math.max(
           column.label.toString().length,
