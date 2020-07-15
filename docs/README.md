@@ -132,7 +132,7 @@ Inline HTML can be rendered as needed. `pagedtable.js` will attempt to do some c
     {
       "columns": [
         { "name": "name",       "label": "Automobile", "type": "character" },
-        { "name": "mpg",        "label": "MPG",        "type": "numeric" }
+        { "name": "mpg",        "label": "MPG",        "type": "numeric" },
         { "name": "car_image",  "label": "Picture",    "type": "image", "html": true }
       ],
       "data": [
