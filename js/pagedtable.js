@@ -158,7 +158,7 @@ if (!Array.prototype.map) {
 
 var pagedTableStyle = "\
 .pagedtable {\
-  overflow: hidden;\
+  overflow: none;\
   padding-left: 8px;\
   padding-right: 8px;\
   color: #333;\

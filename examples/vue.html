@@ -50,9 +50,11 @@
                 dataframe.data[idxRow]["C" + idxCol] = ((Math.floor(10000 * Math.random())) / 100).toString();
               }
             }
+
+            var col8 = document.getElementsByClassName("col-8")[0]
+            col8.innerHTML = "<div id=\"pagedtable\"></div>"
             
             var pagedTableElem = document.getElementById("pagedtable");
-            pagedTableElem.outerHTML = pagedTableElem.outerHTML;
 
             //clear out contents
             var  pagedTable = new PagedTable(pagedTableElem, dataframe);
