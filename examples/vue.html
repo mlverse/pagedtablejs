@@ -28,6 +28,7 @@
       </div>
     </div>
     <script type="application/javascript">
+    
       var app = new Vue({
         el: '#app',
         data: {
@@ -35,7 +36,10 @@
           cols: 10,
           minRows: 10
         },
+        
+  
         methods: {
+        
           updatePaged: function() {
             var dataframe = { data: [], options: {
               rows: { min: this.minRows, max: this.minRows }
@@ -52,8 +56,10 @@
             
             var pagedTableElem = document.getElementById("pagedtable");
 
-            var pagedTable = new PagedTable(pagedTableElem, dataframe);
+            //clear out contents
+            var  pagedTable = new PagedTable(pagedTableElem, dataframe);
             pagedTable.init();
+
           },
           changeRows: function(event) {
             this.rows = event.target.value;
