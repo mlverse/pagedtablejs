@@ -13,7 +13,7 @@
 </style>
 
 ### Mini
-<iframe name="Framename" src="./mini.html" frameborder="0" scrolling="auto" class="frame-area">
+<iframe name="Framename" src="mini.html" frameborder="0" scrolling="auto" class="frame-area">
 </iframe>
 
 ### Paging
@@ -25,7 +25,7 @@
 </iframe>
 
 ### Input with Embedded HTML
-<iframe name="Framename" src="images2.html" frameborder="0" scrolling="auto" class="frame-area">
+<iframe name="Framename" src="images.html" frameborder="0" scrolling="auto" class="frame-area">
 </iframe>
 
 ### URL input/serving

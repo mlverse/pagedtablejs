@@ -28,6 +28,7 @@
       </div>
     </div>
     <script type="application/javascript">
+    
       var app = new Vue({
         el: '#app',
         data: {
@@ -35,7 +36,10 @@
           cols: 10,
           minRows: 10
         },
+        
+  
         methods: {
+        
           updatePaged: function() {
             var dataframe = { data: [], options: {
               rows: { min: this.minRows, max: this.minRows }
@@ -46,12 +50,14 @@
                 dataframe.data[idxRow]["C" + idxCol] = ((Math.floor(10000 * Math.random())) / 100).toString();
               }
             }
-
+            
             var pagedTableElem = document.getElementById("pagedtable");
-            pagedTableElem.innerHTML = "";
+            pagedTableElem.outerHTML = pagedTableElem.outerHTML;
 
-            var pagedTable = new PagedTable(pagedTableElem, dataframe);
+            //clear out contents
+            var  pagedTable = new PagedTable(pagedTableElem, dataframe);
             pagedTable.init();
+
           },
           changeRows: function(event) {
             this.rows = event.target.value;
