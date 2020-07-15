@@ -51,8 +51,10 @@
               }
             }
             
+            var col8 = document.getElementsByClassName("col-8")[0]
+            col8.innerHTML = "<div id=\"pagedtable\"></div>"
+            
             var pagedTableElem = document.getElementById("pagedtable");
-            pagedTableElem.outerHTML = pagedTableElem.outerHTML;
 
             //clear out contents
             var  pagedTable = new PagedTable(pagedTableElem, dataframe);
