@@ -373,7 +373,7 @@ var PagedTable = function (pagedTable, source) {
       var columns = [];
       var keys = Object.keys(source.data[0]);
       for (var idx = 0; idx < keys.length; idx++) {
-        columns[idx] = { name: keys[idx] };
+        columns[idx] = { name: keys[idx], html: false};
       }
 
       source.columns = columns;
@@ -382,10 +382,43 @@ var PagedTable = function (pagedTable, source) {
     else if (typeof(source.columns[0].length) !== "undefined") {
       var columns = []
       for (var idx = 0; idx < source.columns.length; idx++) {
-        columns[idx] = { name: source.columns[idx] };
+        columns[idx] = { name: source.columns[idx], html: false };
       }
 
       source.columns = columns;
+    }
+    
+    //populate columns with missing columns info
+    if(source.columns.length != source.data[0].length){
+      var keys = Object.keys(source.data[0]);
+      var existingKeys = []
+      for (var idx = 0; idx < source.columns.length; idx++) {
+          existingKeys.push(source.columns[idx].name);
+      }
+      var missingKeys = keys.filter(x => !existingKeys.includes(x))
+      
+      //populate with missing 
+      
+      for( var idx = 0; idx < missingKeys.length; idx++) {
+        source.columns.push({name: missingKeys[idx], html: false});
+        existingKeys.push(missingKeys[idx]);
+      }
+      
+      //preserve order of keys
+      var columns = []
+      for (var idx = 0; idx < source.columns.length; idx++) {
+        columns[idx] = source.columns[existingKeys.indexOf(keys[idx])];
+      }
+      
+      source.columns = columns;
+      
+    }
+    
+    //every column must have the label and the html designation
+    for (var idx = 0; idx < source.data[0].length; idx ++) {
+      if (typeof(source.columns[idx].html) === "undefined"){
+        source.columns[idx].html = false;
+      }
     }
 
     for (var idx = 0; idx < source.columns.length ; idx++) {
@@ -403,19 +436,6 @@ var PagedTable = function (pagedTable, source) {
 
     var columns = typeof(options.columns) !== "undefined" ? options.columns : {};
     var rows = typeof(options.rows) !== "undefined" ? options.rows : {};
-    var colhtml = typeof(options.html) !== "undefined" ? options.html : {};
-
-    //if html is not defined for field, assume is not
-    Object.keys(source.data[0]).forEach(function(colname){
-      var colhtml_status = colhtml[colname];
-      if(typeof(colhtml_status) === "undefined"){
-        colhtml_status = false
-      }
-      if(typeof(colhtml_status) !== "boolean"){
-         colhtml_status = false
-      }
-      colhtml[colname] = colhtml_status
-    });
 
     var positiveIntOrNull = function(value, def) {
       return parseInt(value) >= 0 ? parseInt(value) : def;
@@ -432,8 +452,7 @@ var PagedTable = function (pagedTable, source) {
         min: positiveIntOrNull(columns.min, 1),
         max: positiveIntOrNull(columns.max, 10),
         total: positiveIntOrNull(columns.total, null)
-      },
-      html : colhtml
+      }
     };
   }(source);
   
@@ -631,7 +650,7 @@ var PagedTable = function (pagedTable, source) {
           column.type ? column.type.toString().length : 0
         );
         
-        if(!options.html[column.name.toString()]){
+        if(!column.html){
           for (var idxRow = 0; idxRow < Math.min(widthsLookAhead, data.length); idxRow++) {
             var content = data[idxRow][column.name.toString()];
             if (typeof(content) !== "string") content = content.toString();
@@ -647,7 +666,7 @@ var PagedTable = function (pagedTable, source) {
           // width adding outer styles like padding
           outer: maxChars * measures.character + measures.padding,
           // Is width based on internal html
-          html: options.html[column.name.toString()]
+          html: column.html
         };
       });
     };
@@ -846,6 +865,8 @@ var PagedTable = function (pagedTable, source) {
       var htmlCell = document.createElement("td");
       htmlCell.setAttribute("class", "col_" + idx)
       htmlCell.style.display = "&nbsp";
+      
+      
 
 
       if (typeof(dataCell) !== "string") dataCell = dataCell.toString();
@@ -855,9 +876,8 @@ var PagedTable = function (pagedTable, source) {
       var cellText = document.createElement('div');
       cellText.style.width = "fit-content"
       
-      cellText.innerHTML = makeCellContents(dataCell);
-      if(options.html[idx_name]){
-        cellText.innerHTML = dataCell.trim()
+      if(columns.widths[idx_name].html){
+        cellText.innerHTML = makeCellContents(dataCell)
       }else{
         var cellText = document.createTextNode(dataCell);
       }
@@ -982,7 +1002,7 @@ var PagedTable = function (pagedTable, source) {
 
   };
   
-  var ForEach = function(array, direction, func){
+  var forEachDir = function(array, direction, func){
     
     var arr = array;
     
@@ -997,7 +1017,7 @@ var PagedTable = function (pagedTable, source) {
     
     delay = typeof delay !== 'undefined' ? delay : 100;
     
-    ForEach(cols, direction, function(col_idx){
+    forEachDir(cols, direction, function(col_idx){
       setTimeout(function(){
         me.styleColumn("col_" + col_idx,{
           opacity : "1",
@@ -1017,7 +1037,7 @@ var PagedTable = function (pagedTable, source) {
     var newCols = columns.visCols
     
     // disappear the old columns
-    ForEach(currentCols, backwards, function(col_idx){
+    forEachDir(currentCols, backwards, function(col_idx){
       me.toggleColumn("col_" + col_idx);
       me.styleColumn("col_" + col_idx,{
         opacity: 0,
@@ -1495,7 +1515,7 @@ var PagedTable = function (pagedTable, source) {
     
     
     // hide current columns
-    ForEach(currentCols, false, function(col_idx){
+    forEachDir(currentCols, false, function(col_idx){
       me.toggleColumn("col_" + col_idx);
     })
     
@@ -1530,7 +1550,7 @@ var PagedTable = function (pagedTable, source) {
     
     let difference = newCols.filter(x => !currentCols.includes(x));
     
-    ForEach(difference, false, function(col_idx){
+    forEachDir(difference, false, function(col_idx){
       me.styleColumn("col_" + col_idx,{
         opacity:0,
         transition: ""

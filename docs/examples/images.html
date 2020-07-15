@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <!--<script type="text/javascript" src="../js/pagedtable_original.js"></script>-->
     <script type="text/javascript" src="../js/pagedtable.js"></script>
   </head>
   <body>
@@ -9,21 +8,21 @@
       <script data-pagedtable-source type="application/json">
         {
           "data": [
-            { "sticker": "r6", "html": "<img width=50", "blah blah": "blah blah", "blah blah1": "blah blah", "blah blah2": "blah blah", "blah blah3": "blah blah", "blah blah4": "blah blah" },
-            { "sticker": "rstudio", "html": "<img width=50", "blah blah": "blah blah", "blah blah1": "blah blah", "blah blah2": "blah blah", "blah blah3": "blah blah", "blah blah4": "blah blah"},
-            { "sticker": "bookdown", "html": "<img width=50", "blah blah": "blah blah", "blah blah1": "blah blah", "blah blah2": "blah blah", "blah blah3": "blah blah", "blah blah4": "blah blah"}
+            { "sticker": "r6", "html_column": "<img width=50 src='https://github.com/rstudio/hex-stickers/raw/master/PNG/R6.png'/>", "blah blah": "blah blah", "blah blah1": "blah blah", "blah blah2": "blah blah", "blah blah3": "blah blah", "blah blah4": "blah blah" },
+            { "sticker": "rstudio", "html_column": "<img width=50 src='https://github.com/rstudio/hex-stickers/raw/master/PNG/RStudio.png'/>", "blah blah": "blah blah", "blah blah1": "blah blah", "blah blah2": "blah blah", "blah blah3": "blah blah", "blah blah4": "blah blah"},
+            { "sticker": "bookdown", "html_column": "<img width=100 src='https://github.com/rstudio/hex-stickers/raw/master/PNG/bookdown.png'/>", "blah blah": "blah blah", "blah blah1": "blah blah", "blah blah2": "blah blah", "blah blah3": "blah blah", "blah blah4": "blah blah"},
+            { "sticker": "Nah dog", "html_column": "This isnt HTML", "blah blah": "bloo bloo", "blah blah1": "bloo bloo", "blah blah2": "bloo bloo", "blah blah3": "bloo bloo", "blah blah4": "bloo bloo"},
+            { "sticker": "borked html", "html_column": "a < b", "blah blah": "bloo bloo", "blah blah1": "bloo bloo", "blah blah2": "bloo bloo", "blah blah3": "bloo bloo", "blah blah4": "bloo bloo"}
           ],
-          
-         "options": [{
-            "html": {
-              "sticker"    : false,
-              "html"       : false,
-              "blah blah"  : false,
-              "blah blah2" : false,
-              "blah blah3" : false,
-              "blah blah4" : false
-            }         
-          }]
+          "columns": [
+            {"name": "html_column", "html": true, "type": "character"}
+          ],
+         "options": {
+            "rows" : {
+              "min" : 10,
+              "max" : 10
+            }
+          }
         }
       </script>
     </div>
