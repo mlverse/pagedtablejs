@@ -121,6 +121,33 @@ Appart from specifying the minimum rows and columns to display, you can also cus
 
 Notice that the previous example also makes use of `<style>` to customize additional styles. Under the hood, a paged table makes use of the [Shadow DOM](https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_shadow_DOM) to have consistent styling, to turn this off set `shadowDOM` to `false` in the options.
 
+# HTML
+
+Inline HTML can be rendered as needed. `pagedtable.js` will attempt to do some cleaning through [`DOMPurify`](https://github.com/cure53/DOMPurify), and will then render the html inside the table cell for you if it is valid HTML. By default the HTML will not be rendered, and needs to be enabled.
+
+```html
+/*preview*/
+<div data-pagedtable>
+  <script data-pagedtable-source type="application/json">
+    {
+      "columns": [
+        { "name": "name",       "label": "Automobile", "type": "character" },
+        { "name": "mpg",        "label": "MPG",        "type": "numeric" }
+        { "name": "car_image",  "label": "Picture",    "type": "image", "html": true }
+      ],
+      "data": [
+        { "name": "Mazda RX4",         "mpg": 21.0, "car_image": "<img src='https://upload.wikimedia.org/wikipedia/commons/5/5b/1974_Mazda_RX4_Coupe_%2824282369814%29.jpg' height=50;/>"},
+        { "name": "Mazda RX4 Wag",     "mpg": 21.0, "car_image": "<img src='https://upload.wikimedia.org/wikipedia/commons/1/16/Mazda_RX4_Wagon_%281976%2C_127_PS%29.JPG' height=50;/>"},
+        { "name": "Datsun 710",        "mpg": 22.8, "car_image": "<img src='https://upload.wikimedia.org/wikipedia/commons/9/95/Datsun_710_two-door_orange%2C_front_left.jpg' height=50;/>"},
+        { "name": "Hornet 4 Drive",    "mpg": 21.4, "car_image": "<img src='https://upload.wikimedia.org/wikipedia/commons/4/46/1970_AMC_Hornet_SST_2-door_green_Kenosha-f.jpg' height=50;/>"},
+        { "name": "Hornet Sportabout", "mpg": 18.7, "car_image": "<img src='https://upload.wikimedia.org/wikipedia/commons/c/cc/1976_AMC_Hornet_Sportabout.jpg' height=50;/>"}
+      ]
+    }
+  </script>
+</div>
+```
+
+
 # Programmatic
 
 You can also create a paged table programmatically by creating the `PagedTable` object on your:
