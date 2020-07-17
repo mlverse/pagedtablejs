@@ -388,9 +388,9 @@ var PagedTable = function (pagedTable, source) {
       source.columns = columns;
     }
     
+    var keys = Object.keys(source.data[0]);
     //populate columns with missing columns info
-    if(source.columns.length != source.data[0].length){
-      var keys = Object.keys(source.data[0]);
+    if(source.columns.length != keys.length){
       var existingKeys = []
       for (var idx = 0; idx < source.columns.length; idx++) {
           existingKeys.push(source.columns[idx].name);
