@@ -388,9 +388,9 @@ var PagedTable = function (pagedTable, source) {
       source.columns = columns;
     }
     
+    var keys = Object.keys(source.data[0]);
     //populate columns with missing columns info
-    if(source.columns.length != source.data[0].length){
-      var keys = Object.keys(source.data[0]);
+    if(source.columns.length != keys.length){
       var existingKeys = []
       for (var idx = 0; idx < source.columns.length; idx++) {
           existingKeys.push(source.columns[idx].name);
@@ -593,6 +593,11 @@ var PagedTable = function (pagedTable, source) {
       var rowStart = me.getRowStart();
       return rowStart + me.rows;
     };
+    
+    me.getVisRowEnd = function() {
+      var rowStart = me.getRowStart();
+      return Math.min(rowStart + me.rows, data.length);
+    }
 
     me.getPaddingRows = function() {
       var rowStart = me.getRowStart();
@@ -1091,7 +1096,7 @@ var PagedTable = function (pagedTable, source) {
 
   var getLabelInfo = function() {
     var pageStart = page.getRowStart();
-    var pageEnd = page.getRowEnd();
+    var pageEnd = page.getVisRowEnd();
     var totalRows = data.length;
 
     var totalRowsLabel = options.rows.total ? options.rows.total : totalRows;
