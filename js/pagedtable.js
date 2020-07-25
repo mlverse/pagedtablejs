@@ -389,29 +389,30 @@ var PagedTable = function (pagedTable, source) {
     }
     
     //populate columns with missing columns info
-    if(source.columns.length != source.data[0].length){
-      var keys = Object.keys(source.data[0]);
+
+    var keys = Object.keys(source.data[0]);
+    if(source.columns.length != keys.length){
       var existingKeys = []
       for (var idx = 0; idx < source.columns.length; idx++) {
           existingKeys.push(source.columns[idx].name);
       }
       var missingKeys = keys.filter(x => !existingKeys.includes(x))
-      
-      //populate with missing 
-      
+
+      //populate with missing
+
       for( var idx = 0; idx < missingKeys.length; idx++) {
         source.columns.push({name: missingKeys[idx], html: false});
         existingKeys.push(missingKeys[idx]);
       }
-      
+
       //preserve order of keys
       var columns = []
       for (var idx = 0; idx < source.columns.length; idx++) {
         columns[idx] = source.columns[existingKeys.indexOf(keys[idx])];
       }
-      
+
       source.columns = columns;
-      
+
     }
     
     //every column must have the label and the html designation
@@ -1353,7 +1354,7 @@ var PagedTable = function (pagedTable, source) {
     drawTableShellContents();
   };
   
-  me.addTableContents = function(startCol, backwards){
+   me.addTableContents = function(startCol, backwards){
 
     if (tableDiv.clientWidth > 0) {
       tableDiv.style.opacity = 1;
@@ -1367,46 +1368,50 @@ var PagedTable = function (pagedTable, source) {
       parsePadding(tableDivStyle.paddingRight);
 
     var currentWidth = 0;
-    
+
     while (true) {
-      
+
       var columnWidth = columns.getColWidth(columnNumber)
       var currentWidth = currentWidth + columnWidth[0];
-      
+
       //If we know the width of the element, and it will be too wide, nah dog, break out of this loop
-      
-      if (tableDiv.clientWidth - tableDivPadding < currentWidth) {
+
+      if ((tableDiv.clientWidth - tableDivPadding < currentWidth) & 
+             (visibleColumns.length >= options.columns.min)) {
         break;
       }
-      
+
       me.makeColumn(columnNumber, backwards)
-      
+
       // we do not pre-define html element widths, so who knows how wide it will be?
       if(columnWidth[1]){
-        
+
         var html_column = pagedTable.querySelector("table").querySelector("tbody").querySelectorAll(".col_" + columnNumber);
         // get width for each element and compare against current persribed width
         html_column.forEach(function(el){
-          columnWidth[0] = Math.max( columnWidth[0], 
+          columnWidth[0] = Math.max( columnWidth[0],
           el.children[0].offsetWidth);
         })
         currentWidth = currentWidth + columnWidth[0]
         columns.setColWidth(columnNumber, columnWidth[0]);
 
-        if (tableDiv.clientWidth - tableDivPadding < currentWidth) {
+        if ((tableDiv.clientWidth - tableDivPadding < currentWidth) & 
+             (visibleColumns.length >= options.columns.min)) {
           // we need to hide the column that is too wide
           // hiding prevents having to re-generate
           me.toggleColumn("col_" + columnNumber);
           break;
         }
-        
+
       }
-      
+
       visibleColumns.push(columnNumber)
 
-      // dont try to add more fields columns than exist      
+
+
+      // dont try to add more fields columns than exist
       if( columnNumber  === 0 ) {
-        // if we are moving backwards and hit the first column, but did 
+        // if we are moving backwards and hit the first column, but did
         // not fill the table, repopulate with the "old" columns
         if( tableDiv.clientWidth - tableDivPadding > currentWidth){
           if( backwards ){
@@ -1418,9 +1423,9 @@ var PagedTable = function (pagedTable, source) {
           break
         };
       }
-      
+
       if( columnNumber === columns.total-1 ) {
-        // if we are moving to the right and hit the last column, but did 
+        // if we are moving to the right and hit the last column, but did
         // not fill the table, repopulate with the "old" columns
         if( tableDiv.clientWidth - tableDivPadding > currentWidth ){
           if( !backwards & visibleColumns[0] != 0){
@@ -1434,19 +1439,23 @@ var PagedTable = function (pagedTable, source) {
           break
         };
       }
-      
-      
+
+      if(visibleColumns.length === options.columns.max){
+        break
+      }
+
       if(backwards){
         columnNumber -= 1;
       } else {
         columnNumber += 1;
       }
+
     }
-    
+
     if(backwards){
       visibleColumns = visibleColumns.slice().reverse();
     }
-    
+
     columns.setVisibleColumns(visibleColumns)
 
   };
