@@ -323,6 +323,7 @@ var PagedTable = function (pagedTable, source) {
     return source;
   }(pagedTable, source);
 
+  var pagedTableRoot = pagedTable;
   var pagedTable = function(pagedTable, source) {
     if (typeof(pagedTable) === "string") {
       pagedTable = document.getElementById(pagedTable);
@@ -408,7 +409,7 @@ var PagedTable = function (pagedTable, source) {
       pages: positiveIntOrNull(options.pages, null),
       rows: {
         min: positiveIntOrNull(rows.min, 5),
-        max: positiveIntOrNull(rows.max, 10),
+        max: positiveIntOrNull(rows.max, null),
         total: positiveIntOrNull(rows.total, null)
       },
       columns: {
@@ -1161,22 +1162,15 @@ var PagedTable = function (pagedTable, source) {
     return parseInt(value) >= 0 ? parseInt(value) : 0;
   };
 
-  me.fixedHeight = function() {
-    return options.rows.max != null;
-  }
-
   me.fitRows = function() {
-    if (me.fixedHeight())
-      return;
-
     measurer.calculate(measuresCell);
 
     var rows = options.rows.min !== null ? options.rows.min : 0;
     var headerHeight = header !== null && header.offsetHeight > 0 ? header.offsetHeight : 0;
     var footerHeight = footer !== null && footer.offsetHeight > 0 ? footer.offsetHeight : 0;
 
-    if (pagedTable.offsetHeight > 0) {
-      var availableHeight = pagedTable.offsetHeight - headerHeight - footerHeight;
+    if (pagedTableRoot.offsetHeight > 0) {
+      var availableHeight = pagedTableRoot.offsetHeight - headerHeight - footerHeight;
       rows = Math.floor((availableHeight) / measurer.measures.height);
     }
 
@@ -1332,7 +1326,7 @@ var PagedTable = function (pagedTable, source) {
 
       if (
         (resizeNewWidth !== resizeLastWidth) ||
-        (!me.fixedHeight() && resizeNewHeight !== resizeLastHeight)
+        (resizeNewHeight !== resizeLastHeight)
       ) {
         resizeLastWidth = resizeNewWidth;
         resizeLastHeight = resizeNewHeight;
