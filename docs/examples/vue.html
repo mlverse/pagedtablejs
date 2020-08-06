@@ -6,20 +6,20 @@
     <script type="text/javascript" src="../js/pagedtable.js"></script>
   </head>
   <body>
-    <div id="app" class="container" style="margin-top: 50px;">
+    <div id="app" class="container" style="margin: 10px;">
       <div class="row">
-        <div class="col-3">
+        <div class="col-4">
           <label for="rows">Total Rows: {{ rows }}</label>
           <div class="form-group">
-            <input id="rows" type="range" class="custom-range" min=1 style="width: 200px" @change="changeRows">
+            <input id="rows" type="range" class="custom-range" min=1 style="width: 100%" @change="changeRows">
           </div>
           <label for="cols">Total Columns: {{ cols }}</label>
           <div class="form-group">
-            <input id="cols" type="range" class="custom-range" min=1 max=20 value=10 style="width: 200px" @change="changeCols">
+            <input id="cols" type="range" class="custom-range" min=1 max=20 value=10 style="width: 100%" @change="changeCols">
           </div>
           <label for="cols">Show Rows: {{ minRows }}</label>
           <div class="form-group">
-            <input id="minRows" type="range" class="custom-range" min=1 max=15 value=10 style="width: 200px" @change="changeMinRows">
+            <input id="minRows" type="range" class="custom-range" min=1 max=15 value=10 style="width: 100%" @change="changeMinRows">
           </div>
         </div>
         <div class="col-8">
