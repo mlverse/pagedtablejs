@@ -461,7 +461,7 @@ var PagedTable = function (pagedTable, source) {
   // function that will convert a text entry (as is) into an html element or preserve it as text
   var makeCellContents = function(entry){
     var cellContents
-    var sanitized = DOMPurify.sanitize(entry);
+    var sanitized = (typeof(DOMPurify) != 'undefined') ? DOMPurify.sanitize(entry) : entry;
     
     if(sanitized.length === 0){
       cellContents = document.createTextNode(entry);
