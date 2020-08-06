@@ -1086,16 +1086,6 @@ var PagedTable = function (pagedTable, source) {
     
   }
 
-  me.onChange = function(callback) {
-    onChangeCallbacks.push(callback);
-  };
-
-  var triggerOnChange = function() {
-    onChangeCallbacks.forEach(function(onChange) {
-      onChange();
-    });
-  };
-
   var getLabelInfo = function() {
     var pageStart = page.getRowStart();
     var pageEnd = page.getVisRowEnd();
@@ -1495,8 +1485,6 @@ var PagedTable = function (pagedTable, source) {
     function retryFit() {
       if (tableDiv.clientWidth <= 0) {
         setTimeout(retryFit, 100);
-      } else {
-        triggerOnChange();
       }
     }
     if (tableDiv.clientWidth <= 0) {
@@ -1635,8 +1623,6 @@ var PagedTable = function (pagedTable, source) {
         setTimeout(resizeDelayed, 200);
         resizePending = true;
       } else {
-        triggerOnChange();
-
         resizeLastWidth = -1;
         resizeLastHeight = -1;
       }
