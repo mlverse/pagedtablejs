@@ -1,9 +1,9 @@
 # Getting Started
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/vue"><img src="https://img.shields.io/npm/dm/pagedtablejs.svg" alt="downloads"></a>
-  <a href="https://www.npmjs.com/package/vue"><img src="https://img.shields.io/npm/v/pagedtablejs.svg" alt="version"></a>
-  <a href="https://www.npmjs.com/package/vue"><img src="https://img.shields.io/npm/l/pagedtablejs.svg" alt="license"></a>
+  <a href="https://www.npmjs.com/package/pagedtablejs"><img src="https://img.shields.io/npm/dm/pagedtablejs.svg" alt="downloads"></a>
+  <a href="https://www.npmjs.com/package/pagedtablejs"><img src="https://img.shields.io/npm/v/pagedtablejs.svg" alt="version"></a>
+  <a href="https://www.npmjs.com/package/pagedtablejs"><img src="https://img.shields.io/npm/l/pagedtablejs.svg" alt="license"></a>
 </p>
 
 To use `pagedtable.js` include its source:
