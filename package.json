@@ -1,6 +1,6 @@
 {
   "name": "pagedtablejs",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "JavaScript data table for Data Science",
   "main": "./js/pagedtable.js",
   "directories": {
@@ -28,7 +28,7 @@
   "bugs": {
     "url": "https://github.com/mlverse/pagedtablejs/issues"
   },
-  "homepage": "https://github.com/mlverse/pagedtablejs#readme",
+  "homepage": "https://mlverse.github.io/pagedtablejs",
   "dependencies": {
     "dompurify": "^2.0.12"
   }
