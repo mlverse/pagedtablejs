@@ -1,6 +1,6 @@
 {
   "name": "pagedtablejs",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "JavaScript data table for Data Science",
   "main": "./js/pagedtable.js",
   "directories": {

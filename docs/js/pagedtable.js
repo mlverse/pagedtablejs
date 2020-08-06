@@ -326,7 +326,7 @@ var PagedTable = function (pagedTable, source) {
   var pagedTableRoot = pagedTable;
   var pagedTable = function(pagedTable, source) {
     if (typeof(pagedTable) === "string") {
-      pagedTable = document.getElementById(pagedTable);
+      pagedTableRoot = pagedTable = document.getElementById(pagedTable);
     }
 
     // custom style
