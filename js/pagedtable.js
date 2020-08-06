@@ -800,7 +800,7 @@ var PagedTable = function (pagedTable, source) {
       columns.incColumnNumber(direction != "right");
       me.animateColumns(direction != "right");
       renderFooter();
-      graduate_new_columns(columns.visCols, direction != "right");
+      graduateNewColumns(columns.visCols, direction != "right");
     };
     
     header.on
@@ -862,13 +862,13 @@ var PagedTable = function (pagedTable, source) {
     var fragment = document.createDocumentFragment();
     
     // assumption that all fields have the same keys? valid?
-    var idx_name = columnData.name
+    var idxName = columnData.name
     
-    var column_elements = []
+    var columnElements = []
     
     data.forEach(function(dataRow,idxRow) {
       
-      var dataCell = dataRow[idx_name];
+      var dataCell = dataRow[idxName];
       var htmlCell = document.createElement("td");
       htmlCell.setAttribute("class", "col_" + idx)
       htmlCell.style.display = "&nbsp";
@@ -883,14 +883,14 @@ var PagedTable = function (pagedTable, source) {
       var cellText = document.createElement('div');
       cellText.style.width = "fit-content"
       
-      if(columns.widths[idx_name].html){
+      if(columns.widths[idxName].html){
         cellText.innerHTML = makeCellContents(dataCell)
       }else{
         var cellText = document.createTextNode(dataCell);
       }
       
       htmlCell.appendChild(cellText);
-      if (dataCell.length > 50 & !columns.widths[idx_name]["html"]) {
+      if (dataCell.length > 50 & !columns.widths[idxName]["html"]) {
         htmlCell.setAttribute("title", dataCell);
       }
       htmlCell.setAttribute("align", columnData.align);
@@ -900,7 +900,7 @@ var PagedTable = function (pagedTable, source) {
         htmlCell.style.minWidth = htmlCell.style.maxWidth = maxColumnWidth(columnData.width);
       }
       
-      column_elements[idxRow] = htmlCell;
+      columnElements[idxRow] = htmlCell;
     });
     
         
@@ -911,10 +911,10 @@ var PagedTable = function (pagedTable, source) {
       
       var extraRows = page.rows - extraRows;
       
-      var idxRow = column_elements.length;
-      var current_row = column_elements.length;
+      var idxRow = columnElements.length;
+      var currentRow = columnElements.length;
       
-      while(idxRow < (current_row + extraRows)){
+      while(idxRow < (currentRow + extraRows)){
         
         var htmlCell = document.createElement("td");
         htmlCell.setAttribute("class", "col_" + idx)
@@ -932,24 +932,24 @@ var PagedTable = function (pagedTable, source) {
         if (columnData.width) {
           htmlCell.style.minWidth = htmlCell.style.maxWidth = maxColumnWidth(columnData.width);
         }
-        column_elements[idxRow] = htmlCell;
+        columnElements[idxRow] = htmlCell;
         idxRow += 1;
         }
     }
     
     
-    return(column_elements)
+    return(columnElements)
   };
   
   me.toggleColumnNavigation = function(direction){
     
-    var el_class = (direction == "right" ? "right" : "left") + "-navigator-column"; 
-    me.toggleColumn(el_class);
+    var elClass = (direction == "right" ? "right" : "left") + "-navigator-column"; 
+    me.toggleColumn(elClass);
     
   }
   
-  me.toggleColumn = function(el_class){
-    var colNav = pagedTable.querySelectorAll("." + el_class); 
+  me.toggleColumn = function(elClass){
+    var colNav = pagedTable.querySelectorAll("." + elClass); 
     
     colNav.forEach(function(el){
       el.style.display = el.style.display == "none" ? "" : "none"
@@ -961,8 +961,8 @@ var PagedTable = function (pagedTable, source) {
     row.style.visibility = row.style.visibility == "visible" ? "collapse" : "visible"
   }
   
-  me.styleColumn = function(el_class, styles){
-    var coltostyle = pagedTable.querySelectorAll("." + el_class);
+  me.styleColumn = function(elClass, styles){
+    var coltostyle = pagedTable.querySelectorAll("." + elClass);
     for(var s in styles) {
         coltostyle.forEach(function(e){
           e.style[s] = styles[s];
@@ -971,28 +971,28 @@ var PagedTable = function (pagedTable, source) {
   };
   
  // to try to prevent double calculation, the columns must be created. 
-  me.makeColumn = function(column_idx, backwards){
+  me.makeColumn = function(columnIdx, backwards){
     // add column to header
-    var pt_header = pagedTable.querySelector("thead");
-    var pt_body = pagedTable.querySelector("tbody");
+    var ptHeader = pagedTable.querySelector("thead");
+    var ptBody = pagedTable.querySelector("tbody");
     
     // If the column already exists, toggle its visibility, otherwise create it.
-    var colExists = pt_header.querySelector(".col_" + column_idx) != null;
+    var colExists = ptHeader.querySelector(".col_" + columnIdx) != null;
     if(colExists){
-      me.toggleColumn("col_" + column_idx);
+      me.toggleColumn("col_" + columnIdx);
     }else{
       
-      var header_element = makeColumnHeaderElement(column_idx);
-      var body_elements = makeColumnBodyElements(column_idx);
+      var headerElement = makeColumnHeaderElement(columnIdx);
+      var bodyElements = makeColumnBodyElements(columnIdx);
       
       if(backwards){
-        pt_header.querySelector(".right-navigator-column").after(header_element);
+        ptHeader.querySelector(".right-navigator-column").after(headerElement);
       } else{     
-        pt_header.querySelector(".left-navigator-column").before(header_element);
+        ptHeader.querySelector(".left-navigator-column").before(headerElement);
       }
       
-      body_elements.map(function(el, idxRow){
-        var row = pt_body.querySelector(".row_"+idxRow)
+      bodyElements.map(function(el, idxRow){
+        var row = ptBody.querySelector(".row_"+idxRow)
         
         if(backwards){
           row.querySelector(".right-navigator-column").after(el);
@@ -1001,7 +1001,7 @@ var PagedTable = function (pagedTable, source) {
         }
       })
       
-      me.styleColumn("col_" + column_idx,{
+      me.styleColumn("col_" + columnIdx,{
         opacity:0,
         transition: "",
       })
@@ -1020,13 +1020,13 @@ var PagedTable = function (pagedTable, source) {
     arr.forEach(func);
   }
   
-  var graduate_new_columns = function(cols, direction, delay){
+  var graduateNewColumns = function(cols, direction, delay){
     
     delay = typeof delay !== 'undefined' ? delay : 100;
     
-    forEachDir(cols, direction, function(col_idx){
+    forEachDir(cols, direction, function(colIdx){
       setTimeout(function(){
-        me.styleColumn("col_" + col_idx,{
+        me.styleColumn("col_" + colIdx,{
           opacity : "1",
           transition : "opacity 200ms"
         })}, delay);
@@ -1044,9 +1044,9 @@ var PagedTable = function (pagedTable, source) {
     var newCols = columns.visCols
     
     // disappear the old columns
-    forEachDir(currentCols, backwards, function(col_idx){
-      me.toggleColumn("col_" + col_idx);
-      me.styleColumn("col_" + col_idx,{
+    forEachDir(currentCols, backwards, function(colIdx){
+      me.toggleColumn("col_" + colIdx);
+      me.styleColumn("col_" + colIdx,{
         opacity: 0,
         transition: "",
       })
@@ -1061,7 +1061,7 @@ var PagedTable = function (pagedTable, source) {
       me.toggleColumnNavigation("right")
     }
     
-    graduate_new_columns(newCols, backwards);
+    graduateNewColumns(newCols, backwards);
     
     if(currentCols[currentCols.length - 1] === columns.total-1 & backwards){
       me.toggleColumnNavigation("left")
@@ -1271,11 +1271,11 @@ var PagedTable = function (pagedTable, source) {
     var fragment = document.createDocumentFragment();
     //Header
     var header = table.querySelector("thead");
-    var tableheader_row = document.createElement("tr");
-    header.appendChild(tableheader_row);
+    var tableheaderRow = document.createElement("tr");
+    header.appendChild(tableheaderRow);
     
-    tableheader_row.appendChild(renderColumnNavigation("left"));
-    tableheader_row.appendChild(renderColumnNavigation("right"));
+    tableheaderRow.appendChild(renderColumnNavigation("left"));
+    tableheaderRow.appendChild(renderColumnNavigation("right"));
     
     var visRowsPage = page.getVisRows();
     
@@ -1290,13 +1290,13 @@ var PagedTable = function (pagedTable, source) {
           htmlRow.style.visibility = "collapse";
       }
       
-      var left_nav_cell = document.createElement("td");
-      left_nav_cell.setAttribute("class","right-navigator-column");
-      var right_nav_cell = document.createElement("td");
-      right_nav_cell.setAttribute("class","left-navigator-column");
+      var leftNavCell = document.createElement("td");
+      leftNavCell.setAttribute("class","right-navigator-column");
+      var rightNavCell = document.createElement("td");
+      rightNavCell.setAttribute("class","left-navigator-column");
       
-      htmlRow.appendChild(left_nav_cell);
-      htmlRow.appendChild(right_nav_cell)
+      htmlRow.appendChild(leftNavCell);
+      htmlRow.appendChild(rightNavCell)
 
       fragment.appendChild(htmlRow);
     });
@@ -1309,9 +1309,9 @@ var PagedTable = function (pagedTable, source) {
       var extraRows = page.rows - extraRows;
       
       var idx = data.length;
-      var current_row = data.length;
+      var currentRow = data.length;
       
-      while(idx < (current_row + extraRows)){
+      while(idx < (currentRow + extraRows)){
         
         var htmlRow = document.createElement("tr");
         htmlRow.setAttribute("class", "row_"+ idx);
@@ -1321,13 +1321,13 @@ var PagedTable = function (pagedTable, source) {
             htmlRow.style.visibility = "collapse";
         }
         
-        var left_nav_cell = document.createElement("td");
-        left_nav_cell.setAttribute("class","right-navigator-column");
-        var right_nav_cell = document.createElement("td");
-        right_nav_cell.setAttribute("class","left-navigator-column");
+        var leftNavCell = document.createElement("td");
+        leftNavCell.setAttribute("class","right-navigator-column");
+        var rightNavCell = document.createElement("td");
+        rightNavCell.setAttribute("class","left-navigator-column");
         
-        htmlRow.appendChild(left_nav_cell);
-        htmlRow.appendChild(right_nav_cell)
+        htmlRow.appendChild(leftNavCell);
+        htmlRow.appendChild(rightNavCell)
   
         fragment.appendChild(htmlRow);
         idx += 1;
@@ -1382,9 +1382,9 @@ var PagedTable = function (pagedTable, source) {
       // we do not pre-define html element widths, so who knows how wide it will be?
       if(columnWidth[1]){
 
-        var html_column = pagedTable.querySelector("table").querySelector("tbody").querySelectorAll(".col_" + columnNumber);
+        var htmlColumn = pagedTable.querySelector("table").querySelector("tbody").querySelectorAll(".col_" + columnNumber);
         // get width for each element and compare against current persribed width
-        html_column.forEach(function(el){
+        htmlColumn.forEach(function(el){
           columnWidth[0] = Math.max( columnWidth[0],
           el.children[0].offsetWidth);
         })
@@ -1478,7 +1478,7 @@ var PagedTable = function (pagedTable, source) {
       me.toggleColumnNavigation("left");
     }
     
-    graduate_new_columns(columns.visCols, false);
+    graduateNewColumns(columns.visCols, false);
 
 
     // retry seizing columns later if the host has not provided space
@@ -1518,8 +1518,8 @@ var PagedTable = function (pagedTable, source) {
     
     
     // hide current columns
-    forEachDir(currentCols, false, function(col_idx){
-      me.toggleColumn("col_" + col_idx);
+    forEachDir(currentCols, false, function(colIdx){
+      me.toggleColumn("col_" + colIdx);
     })
     
     // add table contents
@@ -1553,14 +1553,14 @@ var PagedTable = function (pagedTable, source) {
     
     let difference = newCols.filter(x => !currentCols.includes(x));
     
-    forEachDir(difference, false, function(col_idx){
-      me.styleColumn("col_" + col_idx,{
+    forEachDir(difference, false, function(colIdx){
+      me.styleColumn("col_" + colIdx,{
         opacity:0,
         transition: ""
       });
     })
     
-    graduate_new_columns(difference, false, 100)
+    graduateNewColumns(difference, false, 100)
     
     
     // "redisplay" current nav bars
